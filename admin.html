@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>後台管理 — 光明健康生活園地</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --green:#4A7C59;--green-light:#7BAE8C;--green-pale:#D6E8D8;
+      --cream:#F8F4ED;--brown:#8B6F47;--text:#2C3A2D;--text-light:#6B7F6C;
+      --white:#fff;--danger:#e53e3e;--warn:#dd6b20;
+      --sidebar:240px;--radius:10px;
+    }
+    body{font-family:'Noto Sans TC',sans-serif;background:#F0F4F1;color:var(--text);min-height:100vh}
+    input,textarea,select,button{font-family:inherit}
+    button{cursor:pointer;border:none;background:none}
+    img{display:block;max-width:100%}
+
+    /* ── LOGIN ── */
+    #loginScreen{
+      position:fixed;inset:0;z-index:999;
+      background:linear-gradient(135deg,#2C4A32,#4A7C59);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .login-box{
+      background:#fff;border-radius:20px;padding:48px 40px;
+      width:min(420px,90vw);text-align:center;
+      box-shadow:0 20px 60px rgba(0,0,0,.2);
+    }
+    .login-logo{font-size:3rem;margin-bottom:16px}
+    .login-title{font-size:1.3rem;font-weight:700;color:var(--green);margin-bottom:6px}
+    .login-sub{font-size:.85rem;color:var(--text-light);margin-bottom:32px}
+    .login-input{
+      width:100%;padding:14px 18px;border:2px solid #e2e8f0;
+      border-radius:var(--radius);font-size:1rem;outline:none;margin-bottom:14px;
+      transition:border-color .2s;
+    }
+    .login-input:focus{border-color:var(--green)}
+    .login-btn{
+      width:100%;padding:14px;background:var(--green);color:#fff;
+      border-radius:var(--radius);font-size:1rem;font-weight:600;
+      transition:background .2s;
+    }
+    .login-btn:hover{background:#3a6348}
+    .login-err{color:var(--danger);font-size:.85rem;margin-top:10px;display:none}
+
+    /* ── LAYOUT ── */
+    #adminApp{display:none;min-height:100vh}
+
+    /* Sidebar */
+    .sidebar{
+      position:fixed;top:0;left:0;bottom:0;width:var(--sidebar);
+      background:#1E2F20;overflow-y:auto;z-index:50;
+    }
+    .sidebar-logo{
+      padding:24px 20px 16px;border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    .sidebar-logo .s-icon{font-size:1.5rem;margin-bottom:6px}
+    .sidebar-logo h1{font-size:.9rem;color:#C8E6B2;font-weight:700;line-height:1.3}
+    .sidebar-logo p{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:2px}
+    .sidebar-nav{padding:16px 0}
+    .nav-group-title{font-size:.68rem;color:rgba(255,255,255,.3);padding:8px 20px 4px;text-transform:uppercase;letter-spacing:.08em}
+    .nav-item{
+      display:flex;align-items:center;gap:10px;padding:11px 20px;
+      color:rgba(255,255,255,.6);font-size:.88rem;cursor:pointer;
+      transition:all .2s;border-left:3px solid transparent;
+    }
+    .nav-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+    .nav-item.active{color:#C8E6B2;background:rgba(255,255,255,.08);border-left-color:#C8E6B2}
+    .nav-item .ni{font-size:1rem;width:20px;text-align:center}
+    .sidebar-footer{padding:20px;border-top:1px solid rgba(255,255,255,.1)}
+    .logout-btn{
+      width:100%;padding:10px;background:rgba(255,255,255,.08);
+      color:rgba(255,255,255,.6);border-radius:var(--radius);font-size:.85rem;
+      transition:all .2s;
+    }
+    .logout-btn:hover{background:rgba(229,62,62,.2);color:#fc8181}
+
+    /* Main */
+    .main{margin-left:var(--sidebar);min-height:100vh}
+    .topbar{
+      background:#fff;padding:0 32px;height:60px;
+      display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid #e8f0e9;position:sticky;top:0;z-index:40;
+    }
+    .topbar h2{font-size:1.05rem;font-weight:700;color:var(--text)}
+    .topbar-right{display:flex;align-items:center;gap:12px}
+    .preview-btn{
+      display:flex;align-items:center;gap:6px;padding:8px 18px;
+      background:var(--green-pale);color:var(--green);border-radius:50px;
+      font-size:.85rem;font-weight:600;transition:all .2s;
+    }
+    .preview-btn:hover{background:var(--green);color:#fff}
+    .save-toast{
+      background:var(--green);color:#fff;padding:8px 18px;border-radius:50px;
+      font-size:.82rem;opacity:0;transition:opacity .3s;pointer-events:none;
+    }
+    .save-toast.show{opacity:1}
+    .content{padding:28px 32px;max-width:900px}
+
+    /* Cards */
+    .card{background:#fff;border-radius:14px;padding:28px;margin-bottom:20px;border:1px solid #e8f0e9}
+    .card-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:8px}
+    .card-title .ct-icon{font-size:1.1rem}
+
+    /* Form Elements */
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .fg{margin-bottom:16px}
+    .fg label{font-size:.82rem;color:var(--text-light);display:block;margin-bottom:6px;font-weight:500}
+    .fg input,.fg textarea,.fg select{
+      width:100%;padding:11px 14px;border:1.5px solid #e2e8f0;
+      border-radius:var(--radius);font-size:.9rem;color:var(--text);
+      background:#fafafa;outline:none;transition:border-color .2s;
+    }
+    .fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--green);background:#fff}
+    .fg textarea{resize:vertical;min-height:90px;line-height:1.6}
+    .fg .hint{font-size:.75rem;color:var(--text-light);margin-top:4px}
+
+    /* Buttons */
+    .btn{padding:10px 22px;border-radius:var(--radius);font-size:.88rem;font-weight:600;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+    .btn-primary{background:var(--green);color:#fff}
+    .btn-primary:hover{background:#3a6348}
+    .btn-danger{background:#fff;color:var(--danger);border:1.5px solid #fed7d7}
+    .btn-danger:hover{background:var(--danger);color:#fff}
+    .btn-outline{background:#fff;color:var(--green);border:1.5px solid var(--green-pale)}
+    .btn-outline:hover{background:var(--green-pale)}
+    .btn-sm{padding:6px 14px;font-size:.8rem}
+    .btn-warn{background:#fff;color:var(--warn);border:1.5px solid #feebc8}
+    .btn-warn:hover{background:var(--warn);color:#fff}
+
+    /* Product list */
+    .product-list{display:flex;flex-direction:column;gap:12px}
+    .product-row{
+      display:flex;align-items:center;gap:16px;
+      background:#fafafa;border:1.5px solid #e8f0e9;
+      border-radius:var(--radius);padding:14px 18px;
+      transition:border-color .2s;
+    }
+    .product-row:hover{border-color:var(--green-pale)}
+    .product-row-img{
+      width:56px;height:56px;border-radius:8px;
+      background:var(--green-pale);flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;font-size:1.8rem;
+      overflow:hidden;
+    }
+    .product-row-img img{width:100%;height:100%;object-fit:cover}
+    .product-row-info{flex:1;min-width:0}
+    .product-row-name{font-weight:600;font-size:.9rem;margin-bottom:2px}
+    .product-row-meta{font-size:.78rem;color:var(--text-light)}
+    .product-row-price{font-weight:700;color:var(--brown);font-size:.95rem;margin:0 12px}
+    .product-row-actions{display:flex;gap:8px;flex-shrink:0}
+    .drag-handle{color:var(--text-light);cursor:grab;padding:4px;font-size:1rem}
+
+    /* Product form modal */
+    .modal-bg{
+      position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);
+      display:flex;align-items:flex-start;justify-content:center;
+      padding:20px;overflow-y:auto;
+    }
+    .modal-bg.hidden{display:none}
+    .modal-box{
+      background:#fff;border-radius:18px;width:100%;max-width:680px;
+      margin:auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2);
+    }
+    .modal-head{
+      padding:20px 24px;border-bottom:1px solid #e8f0e9;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .modal-head h3{font-size:1.05rem;font-weight:700}
+    .modal-close{width:32px;height:32px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#666}
+    .modal-close:hover{background:var(--danger);color:#fff}
+    .modal-body{padding:24px}
+    .modal-foot{padding:16px 24px;border-top:1px solid #e8f0e9;display:flex;justify-content:flex-end;gap:10px}
+
+    /* Image upload */
+    .img-upload{
+      border:2px dashed #c8d9c9;border-radius:var(--radius);
+      padding:24px;text-align:center;cursor:pointer;transition:all .2s;
+      position:relative;overflow:hidden;
+    }
+    .img-upload:hover{border-color:var(--green);background:var(--green-pale)}
+    .img-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+    .img-upload .iu-preview{width:100%;height:160px;object-fit:cover;border-radius:8px;margin-top:12px}
+    .img-upload .iu-icon{font-size:2rem;margin-bottom:8px}
+    .img-upload p{font-size:.85rem;color:var(--text-light)}
+
+    /* Tab bar */
+    .tab-bar{display:flex;gap:4px;background:#f0f4f1;border-radius:var(--radius);padding:4px;margin-bottom:20px}
+    .tab-item{flex:1;padding:9px;text-align:center;border-radius:8px;font-size:.85rem;cursor:pointer;color:var(--text-light);transition:all .2s}
+    .tab-item.active{background:#fff;color:var(--green);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+
+    /* Trust items */
+    .trust-list{display:flex;flex-direction:column;gap:8px}
+    .trust-item-row{display:flex;align-items:center;gap:10px}
+    .trust-item-row input{flex:1}
+    .trust-item-row .del-trust{color:var(--danger);font-size:1.1rem;padding:4px 8px}
+
+    /* Badge */
+    .badge{display:inline-block;padding:2px 10px;border-radius:50px;font-size:.72rem;font-weight:600}
+    .badge-green{background:var(--green-pale);color:var(--green)}
+    .badge-brown{background:#fef3e2;color:var(--brown)}
+
+    /* Settings */
+    .pwd-section{border-top:1px solid #e8f0e9;margin-top:20px;padding-top:20px}
+
+    /* Highlight editor */
+    .highlight-row{display:grid;grid-template-columns:60px 1fr;gap:10px;align-items:center;margin-bottom:10px}
+    .highlight-row > div{display:flex;flex-direction:column;justify-content:center}
+
+    /* Highlight image upload */
+    .hl-img-btn{width:56px;height:56px;border:2px dashed #c8d9c9;border-radius:8px;cursor:pointer;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fafafa;flex-shrink:0;transition:border-color .2s}
+    .hl-img-btn:hover{border-color:var(--green);background:var(--green-pale)}
+    .hl-img-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .hl-img-btn span{font-size:1.3rem}
+    /* Feature image upload */
+    .feat-img-btn{width:80px;height:80px;border:2px dashed #c8d9c9;border-radius:10px;cursor:pointer;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fafafa;transition:all .2s;text-align:center}
+    .feat-img-btn:hover{border-color:var(--green);background:var(--green-pale)}
+    .feat-img-btn img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .feat-img-btn span.fi-ph{font-size:1.6rem}
+    .feat-img-btn small{font-size:.62rem;color:var(--text-light);margin-top:2px}
+
+    /* Mobile */
+    @media(max-width:700px){
+      .sidebar{transform:translateX(-100%);transition:transform .3s}
+      .sidebar.open{transform:translateX(0)}
+      .main{margin-left:0}
+      .content{padding:20px 16px}
+      .topbar{padding:0 16px}
+      .form-row{grid-template-columns:1fr}
+      .product-row-price{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🌿</div>
+    <div class="login-title">光明健康生活園地</div>
+    <div class="login-sub">後台管理系統 — 請輸入密碼登入</div>
+    <input class="login-input" type="password" id="pwdInput" placeholder="輸入管理密碼" onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="login-btn" onclick="doLogin()">登入後台</button>
+    <div class="login-err" id="loginErr">❌ 密碼錯誤，請重試</div>
+    <p style="margin-top:20px;font-size:.78rem;color:#aaa">預設密碼：guangming888（可在後台更改）</p>
+  </div>
+</div>
+
+<!-- ══════════════ ADMIN APP ══════════════ -->
+<div id="adminApp">
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="s-icon">🌿</div>
+      <h1>光明健康生活園地</h1>
+      <p>後台管理系統</p>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group-title">內容管理</div>
+      <div class="nav-item active" onclick="showSection('home-settings')"><span class="ni">🏠</span>首頁設定</div>
+      <div class="nav-item" onclick="showSection('products-mgr')"><span class="ni">📦</span>商品管理</div>
+      <div class="nav-item" onclick="showSection('tab-mgr')"><span class="ni">🏷️</span>分類標籤管理</div>
+      <div class="nav-item" onclick="showSection('category-mgr')"><span class="ni">🗂️</span>系列介紹</div>
+      <div class="nav-item" onclick="showSection('fresh-settings')"><span class="ni">🥬</span>生鮮訂購設定</div>
+      <div class="nav-group-title">基本設定</div>
+      <div class="nav-item" onclick="showSection('store-settings')"><span class="ni">🏪</span>店鋪資料</div>
+      <div class="nav-item" onclick="showSection('security')"><span class="ni">🔒</span>安全設定</div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()">🚪 登出後台</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <h2 id="topbarTitle">首頁設定</h2>
+      <div class="topbar-right">
+        <span class="save-toast" id="saveToast">✅ 已儲存！</span>
+        <a href="index.html" target="_blank" class="preview-btn">👁️ 預覽網站</a>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- ─── 首頁設定 ─── -->
+      <div id="sec-home-settings" class="section">
+
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🖼️</span>首頁橫幅</div>
+          <div class="fg"><label>小標籤文字（橫幅頂部）</label><input id="hs-badge" type="text" /></div>
+          <div class="form-row">
+            <div class="fg"><label>大標題（第一行）</label><input id="hs-title1" type="text" /></div>
+            <div class="fg"><label>大標題（第二行，綠色強調）</label><input id="hs-title2" type="text" /></div>
+          </div>
+          <div class="fg"><label>副標題描述</label><textarea id="hs-desc"></textarea></div>
+          <div class="form-row">
+            <div class="fg"><label>按鈕一文字</label><input id="hs-btn1" type="text" /></div>
+            <div class="fg"><label>按鈕二文字</label><input id="hs-btn2" type="text" /></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🖼️</span>網站圖片設定</div>
+          <div class="fg">
+            <label>品牌 Logo 圖片（取代🌿圖示，建議正方形，PNG/JPG）</label>
+            <div class="img-upload" id="logoUploadArea">
+              <input type="file" accept="image/*" onchange="handleLogoUpload(this)" />
+              <div id="logoPlaceholder"><div class="iu-icon">🏷️</div><p>點擊上傳 Logo 圖片<br><small>建議 200×200px，PNG 透明底更佳</small></p></div>
+              <img id="logoPreview" class="iu-preview" style="display:none;height:100px;object-fit:contain" />
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="clearLogoImage()">清除 Logo</button>
+          </div>
+          <div class="fg">
+            <label>首頁橫幅背景圖（取代綠色漸層背景，建議 1440×800px）</label>
+            <div class="img-upload" id="heroBgUploadArea">
+              <input type="file" accept="image/*" onchange="handleHeroBgUpload(this)" />
+              <div id="heroBgPlaceholder"><div class="iu-icon">🏞️</div><p>點擊上傳橫幅背景圖<br><small>建議 1440×800px，JPG/PNG，上傳後文字仍會顯示於圖片上</small></p></div>
+              <img id="heroBgPreview" class="iu-preview" style="display:none" />
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="clearHeroBgImage()">清除背景圖</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">✅</span>信任標語列（橫幅下方）</div>
+          <p style="font-size:.82rem;color:var(--text-light);margin-bottom:14px">每行格式：emoji 空格 文字，例如：✅ 天然有機成分</p>
+          <div class="trust-list" id="trustList"></div>
+          <button class="btn btn-outline btn-sm" style="margin-top:10px" onclick="addTrustItem()">+ 新增標語</button>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">✨</span>關於我們（四項特色）</div>
+          <div id="features-editor"></div>
+        </div>
+
+        <div style="text-align:right">
+          <button class="btn btn-primary" onclick="saveHomeSettings()">💾 儲存首頁設定</button>
+        </div>
+      </div>
+
+      <!-- ─── 商品管理 ─── -->
+      <div id="sec-products-mgr" class="section" style="display:none">
+
+        <div class="card">
+          <div class="card-title" style="justify-content:space-between">
+            <span><span class="ct-icon">📦</span>商品列表</span>
+            <button class="btn btn-primary btn-sm" onclick="openProductModal(null)">+ 新增商品</button>
+          </div>
+          <div class="tab-bar" id="productListTabBar">
+            <div class="tab-item active" onclick="filterProductList('all',this)">全部商品</div>
+          </div>
+          <div class="product-list" id="productList"></div>
+        </div>
+      </div>
+
+      <!-- ─── 系列介紹 ─── -->
+      <div id="sec-category-mgr" class="section" style="display:none">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🌱</span>系列一 — 有機生活用品</div>
+          <div class="fg"><label>系列子標籤</label><input id="cat1-tag" type="text" /></div>
+          <div class="fg"><label>系列名稱</label><input id="cat1-name" type="text" /></div>
+          <div class="fg"><label>系列描述</label><textarea id="cat1-desc"></textarea></div>
+          <div class="fg">
+            <label>系列一卡片背景圖（取代深綠漸層，建議 800×600px）</label>
+            <div class="img-upload" id="cat1BgUploadArea">
+              <input type="file" accept="image/*" onchange="handleCat1BgUpload(this)" />
+              <div id="cat1BgPlaceholder"><div class="iu-icon">🏞️</div><p>點擊上傳系列一背景圖<br><small>建議 800×600px，JPG/PNG</small></p></div>
+              <img id="cat1BgPreview" class="iu-preview" style="display:none" />
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="clearCat1BgImage()">清除圖片</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🌸</span>系列二 — 天然漢方護膚品</div>
+          <div class="fg"><label>系列子標籤</label><input id="cat2-tag" type="text" /></div>
+          <div class="fg"><label>系列名稱</label><input id="cat2-name" type="text" /></div>
+          <div class="fg"><label>系列描述</label><textarea id="cat2-desc"></textarea></div>
+          <div class="fg">
+            <label>系列二卡片背景圖（取代棕色漸層，建議 800×600px）</label>
+            <div class="img-upload" id="cat2BgUploadArea">
+              <input type="file" accept="image/*" onchange="handleCat2BgUpload(this)" />
+              <div id="cat2BgPlaceholder"><div class="iu-icon">🏞️</div><p>點擊上傳系列二背景圖<br><small>建議 800×600px，JPG/PNG</small></p></div>
+              <img id="cat2BgPreview" class="iu-preview" style="display:none" />
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="clearCat2BgImage()">清除圖片</button>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <button class="btn btn-primary" onclick="saveCategorySettings()">💾 儲存系列設定</button>
+        </div>
+      </div>
+
+      <!-- ─── 店鋪資料 ─── -->
+      <div id="sec-store-settings" class="section" style="display:none">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🏪</span>店鋪基本資料</div>
+          <div class="fg"><label>店鋪名稱</label><input id="ss-name" type="text" /></div>
+          <div class="fg"><label>品牌英文副標</label><input id="ss-sub" type="text" /></div>
+          <div class="fg"><label>頁腳描述語</label><textarea id="ss-footer-desc" style="min-height:70px"></textarea></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">📞</span>聯絡資訊</div>
+          <div class="form-row">
+            <div class="fg"><label>LINE ID</label><input id="ss-line" type="text" /><div class="hint">個人帳號直接填 ID（例如 abc123）；官方帳號請含 @（例如 @172fexmi）</div></div>
+            <div class="fg"><label>電話號碼</label><input id="ss-phone" type="text" /></div>
+          </div>
+          <div class="fg"><label>電子郵件</label><input id="ss-email" type="email" /></div>
+        </div>
+        <div style="text-align:right">
+          <button class="btn btn-primary" onclick="saveStoreSettings()">💾 儲存店鋪資料</button>
+        </div>
+      </div>
+
+      <!-- ─── 生鮮訂購設定 ─── -->
+      <div id="sec-fresh-settings" class="section" style="display:none">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🥬</span>生鮮訂購橫幅設定</div>
+          <div class="fg">
+            <label>橫幅背景圖（建議 1440×600px）</label>
+            <div class="img-upload" id="freshBgUploadArea">
+              <input type="file" accept="image/*" onchange="handleFreshBgUpload(this)" />
+              <div id="freshBgPlaceholder"><div class="iu-icon">🥬</div><p>點擊上傳生鮮橫幅背景圖<br><small>建議 1440×600px，JPG/PNG</small></p></div>
+              <img id="freshBgPreview" class="iu-preview" style="display:none" />
+            </div>
+            <button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="clearFreshBgImage()">清除背景圖</button>
+          </div>
+          <div class="fg"><label>小標籤文字（如：🥬 全新服務上線）</label><input id="fs-label" type="text" /></div>
+          <div class="form-row">
+            <div class="fg"><label>主標題第一行</label><input id="fs-title1" type="text" /></div>
+            <div class="fg"><label>主標題第二行（綠色強調）</label><input id="fs-title2" type="text" /></div>
+          </div>
+          <div class="fg"><label>描述文字</label><textarea id="fs-desc" style="min-height:80px"></textarea></div>
+          <div class="fg"><label>按鈕文字</label><input id="fs-btn" type="text" /></div>
+          <div class="fg"><label>訂購連結網址</label><input id="fs-url" type="url" placeholder="https://fresh-order.vercel.app/" /><div class="hint">點擊按鈕後前往此網址</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">✅</span>服務特點（4項，每項 emoji + 文字）</div>
+          <p style="font-size:.82rem;color:var(--text-light);margin-bottom:14px">格式：emoji 文字，例如：🌾 嚴選在地有機農場</p>
+          <div id="freshFeatureList"></div>
+        </div>
+        <div style="text-align:right">
+          <button class="btn btn-primary" onclick="saveFreshSettings()">💾 儲存生鮮設定</button>
+        </div>
+      </div>
+
+      <!-- ─── 安全設定 ─── -->
+      <!-- 分類標籤管理 -->
+      <div id="sec-tab-mgr" class="section" style="display:none">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🏷️</span>精選商品分類標籤</div>
+          <p style="font-size:.85rem;color:var(--text-light);margin-bottom:16px">在這裡管理精選商品區的分類標籤，新增或刪除分類後，商品管理中的分類選單與網站前台的分類按鈕都會自動更新。</p>
+          <div id="tabList" style="margin-bottom:20px"></div>
+          <hr style="margin:20px 0;border-color:var(--border)">
+          <div class="card-title" style="font-size:.95rem;margin-bottom:12px">新增分類</div>
+          <div class="form-row" style="align-items:flex-end;gap:12px">
+            <div class="fg" style="flex:0 0 120px">
+              <label>分類 ID（英文）</label>
+              <input id="new-tab-id" type="text" placeholder="如 care" />
+            </div>
+            <div class="fg">
+              <label>分類名稱（中文顯示）</label>
+              <input id="new-tab-label" type="text" placeholder="如 漢方調理" />
+            </div>
+            <button class="btn btn-primary" style="white-space:nowrap;margin-bottom:0" onclick="addTab()">＋ 新增分類</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="sec-security" class="section" style="display:none">
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🔒</span>更改後台密碼</div>
+          <div class="fg"><label>目前密碼</label><input id="pwd-current" type="password" /></div>
+          <div class="fg"><label>新密碼</label><input id="pwd-new" type="password" /></div>
+          <div class="fg"><label>確認新密碼</label><input id="pwd-confirm" type="password" /></div>
+          <div id="pwd-msg" style="font-size:.85rem;margin-bottom:12px;display:none"></div>
+          <button class="btn btn-primary" onclick="changePassword()">🔑 更新密碼</button>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="ct-icon">🗑️</span>重置所有設定</div>
+          <p style="font-size:.85rem;color:var(--text-light);margin-bottom:16px">將所有內容恢復為預設值（商品、設定等全部重置），此動作無法還原。</p>
+          <button class="btn btn-danger" onclick="resetAll()">⚠️ 重置所有設定</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ 商品編輯 Modal ══ -->
+<div class="modal-bg hidden" id="productModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3 id="modalTitle">新增商品</h3>
+      <button class="modal-close" onclick="closeProductModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row" style="margin-bottom:16px">
+        <div class="fg">
+          <label>分類 *</label>
+          <select id="p-cat"></select>
+        </div>
+        <div class="fg">
+          <label>標籤徽章（可空白）</label>
+          <select id="p-badge">
+            <option value="">無</option>
+            <option value="熱銷">熱銷</option>
+            <option value="新品">新品</option>
+            <option value="環保">環保</option>
+            <option value="暢銷">暢銷</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="fg"><label>商品名稱 *</label><input id="p-name" type="text" placeholder="例如：有機天然洗碗精" /></div>
+      <div class="fg"><label>商品圖示（Emoji）</label><input id="p-emoji" type="text" placeholder="🍃" style="font-size:1.5rem;width:80px" /></div>
+
+      <div class="fg">
+        <label>商品圖片（上傳圖片，會取代圖示）</label>
+        <div class="img-upload" id="imgUploadArea">
+          <input type="file" accept="image/*" onchange="handleImageUpload(this)" />
+          <div id="imgPlaceholder"><div class="iu-icon">📷</div><p>點擊或拖曳上傳圖片<br><small>建議尺寸 800×800px，JPG/PNG</small></p></div>
+          <img id="imgPreview" class="iu-preview" style="display:none" />
+        </div>
+        <button class="btn btn-sm btn-danger" style="margin-top:6px" onclick="clearImage()">清除圖片</button>
+      </div>
+
+      <div class="form-row">
+        <div class="fg"><label>售價（NT$）*</label><input id="p-price" type="number" placeholder="280" /></div>
+        <div class="fg"><label>原價（NT$，選填，有才顯示劃線）</label><input id="p-orig-price" type="number" placeholder="0" /></div>
+      </div>
+
+      <div class="fg"><label>列表簡短描述（一行）</label><input id="p-short" type="text" placeholder="天然植物萃取，溫和去油不傷手..." /></div>
+
+      <div class="fg">
+        <label>特色標籤（用逗號分隔，最多4個）</label>
+        <input id="p-tags" type="text" placeholder="植物萃取, 無磷酸鹽, 生物可分解, 敏感肌適用" />
+      </div>
+
+      <div class="fg"><label>📖 產品介紹（詳細頁）</label><textarea id="p-intro" style="min-height:100px" placeholder="詳細描述產品特色、功效..."></textarea></div>
+      <div class="fg"><label>🧪 成分說明</label><textarea id="p-ingredients" style="min-height:80px" placeholder="列出主要成分..."></textarea></div>
+      <div class="fg"><label>📋 使用方法（每步驟換行）</label><textarea id="p-howto" style="min-height:90px" placeholder="1. 第一步驟&#10;2. 第二步驟..."></textarea></div>
+      <div class="fg"><label>⚠️ 注意事項（每條換行）</label><textarea id="p-cautions" style="min-height:80px" placeholder="・注意事項一&#10;・注意事項二..."></textarea></div>
+
+      <div class="fg">
+        <label>🌿 產品亮點（4個）— 點擊圖示區上傳圖片</label>
+        <div id="highlights-editor">
+          <div class="highlight-row">
+            <div class="hl-img-btn" onclick="document.getElementById('hl-file-0').click()"><input id="hl-file-0" type="file" accept="image/*" style="display:none" onchange="handleHlImgUpload(this,0)" /><img id="hl-img-0" style="display:none" /><span id="hl-ph-0">📷</span></div>
+            <div><input type="hidden" class="hl-icon-img" id="hl-icon-img-0" /><input type="hidden" class="hl-icon" /><input type="text" placeholder="亮點文字" class="hl-text" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /></div>
+          </div>
+          <div class="highlight-row">
+            <div class="hl-img-btn" onclick="document.getElementById('hl-file-1').click()"><input id="hl-file-1" type="file" accept="image/*" style="display:none" onchange="handleHlImgUpload(this,1)" /><img id="hl-img-1" style="display:none" /><span id="hl-ph-1">📷</span></div>
+            <div><input type="hidden" class="hl-icon-img" id="hl-icon-img-1" /><input type="hidden" class="hl-icon" /><input type="text" placeholder="亮點文字" class="hl-text" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /></div>
+          </div>
+          <div class="highlight-row">
+            <div class="hl-img-btn" onclick="document.getElementById('hl-file-2').click()"><input id="hl-file-2" type="file" accept="image/*" style="display:none" onchange="handleHlImgUpload(this,2)" /><img id="hl-img-2" style="display:none" /><span id="hl-ph-2">📷</span></div>
+            <div><input type="hidden" class="hl-icon-img" id="hl-icon-img-2" /><input type="hidden" class="hl-icon" /><input type="text" placeholder="亮點文字" class="hl-text" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /></div>
+          </div>
+          <div class="highlight-row">
+            <div class="hl-img-btn" onclick="document.getElementById('hl-file-3').click()"><input id="hl-file-3" type="file" accept="image/*" style="display:none" onchange="handleHlImgUpload(this,3)" /><img id="hl-img-3" style="display:none" /><span id="hl-ph-3">📷</span></div>
+            <div><input type="hidden" class="hl-icon-img" id="hl-icon-img-3" /><input type="hidden" class="hl-icon" /><input type="text" placeholder="亮點文字" class="hl-text" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeProductModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveProduct()">💾 儲存商品</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  DEFAULT DATA
+// ══════════════════════════════════════════
+const DEFAULTS = {
+  password: 'guangming888',
+  freshSettings: {
+    bgImage: '',
+    label: '🥬 全新服務上線',
+    title1: '每週新鮮直送',
+    title2: '有機生鮮訂購',
+    desc: '與在地有機農場合作，每週精選當季新鮮蔬果，從農場到餐桌最短距離，讓您的家人吃得安心、吃得健康。',
+    btnText: '🥬 立即訂購生鮮',
+    url: 'https://fresh-order.vercel.app/',
+    features: ['🌾 嚴選在地有機認證農場','🚚 每週固定配送，新鮮保證','📦 可彈性調整份量與品項','♻️ 環保可回收冷藏包裝']
+  },
+  storeSettings: {
+    name: '光明健康生活園地',
+    sub: 'Organic · Natural · Pure',
+    footerDesc: '以自然為本，以健康為念。\n我們相信，最好的生活，來自最純淨的選擇。',
+    line: 'https://line.me/R/ti/p/%40172fexmi',
+    phone: '',
+    email: 'ms0606432@icloud.com'
+  },
+  homeSettings: {
+    badge: '🌿 有機 · 天然 · 純淨',
+    title1: '讓生活回歸',
+    title2: '自然的純淨',
+    desc: '光明健康生活園地嚴選有機生活用品與天然漢方草本護膚品，讓您的每一天都充滿自然的能量與健康。',
+    btn1: '立即選購',
+    btn2: '聯繫我們',
+    logoImage: '',
+    heroBgImage: '',
+    trust: ['✅ 天然有機成分','🌿 無農藥殘留','🔬 嚴格品質把關','🚚 全台配送到府','💚 環保友善包裝'],
+    features: [
+      {icon:'🌿', title:'100% 天然有機', desc:'所有產品嚴格篩選天然有機原料，無農藥、無化學添加，守護您與家人的健康。'},
+      {icon:'🔬', title:'嚴格品質把關', desc:'每批產品經過嚴格檢驗，確保純淨度與有效性，讓您使用得安心。'},
+      {icon:'🌱', title:'漢方草本配方', desc:'傳承千年漢方智慧，結合現代科學，提供溫和有效的天然護理。'},
+      {icon:'♻️', title:'環保永續包裝', desc:'採用可回收環保包材，減少碳足跡，與您一起守護這片美麗土地。'},
+    ]
+  },
+  categorySettings: {
+    cat1: { tag:'律活綠活', name:'有機生活用品', desc:'從日常清潔到居家護理，嚴選有機環保材料，讓您的家更潔淨、更安心。', bgImage: '' },
+    cat2: { tag:'神采彤妍', name:'天然漢方草本護膚品', desc:'融合千年漢方智慧與現代工藝，以天然草本呵護您的每一寸肌膚。', bgImage: '' }
+  },
+  productTabs: [
+    {id:'set', label:'護膚套組'},
+    {id:'life', label:'有機生活用品'},
+    {id:'skin', label:'天然漢方護膚品'},
+    {id:'hair', label:'頭皮養護'}
+  ],
+  products: [
+    // 護膚套組（含美妍館12次服務）
+    {id:13,cat:'set',name:'神采賦活靚麗套組',emoji:'👑',image:'',price:60000,origPrice:0,badge:'旗艦套組',shortDesc:'頂級漢方草本全套保養，含金面膜、安瓶等，附贈美妍館12次專業經絡撥筋服務',tags:['旗艦全套','美妍館12次','經絡撥筋','行氣活血'],intro:'神采賦活靚麗套組匯集品牌最頂級的漢方草本護膚精華，套組包含：神秘面紗賦活金面膜（6片）、神秘面紗靚麗銀面膜（6片）、高效修護精華安瓶（4瓶）、尊愛風華調理按摩霜（100ml）、玫瑰彤妍精華液×1、玫瑰彤妍精華乳霜×1。附贈美妍館12次專業經絡撥筋服務，行氣活血、促進淋巴循環。',ingredients:'套組包含：神秘面紗賦活金面膜×1盒（6片）、神秘面紗靚麗銀面膜×1盒（6片）、高效修護精華安瓶×4瓶、尊愛風華調理按摩霜×100ml、玫瑰彤妍精華液×1、玫瑰彤妍精華乳霜×1',howToUse:'【每日保養】調理按摩霜→精華液→乳霜；安瓶密集修護；每週2次金/銀面膜。\n【美妍館服務】憑購買憑證預約12次專業經絡撥筋（效期2年）。',cautions:'・套組商品不接受拆售\n・美妍館服務效期2年',highlights:[{icon:'👑',text:'頂級全套漢方護膚'},{icon:'💆',text:'美妍館12次經絡撥筋'},{icon:'🔥',text:'行氣活血淋巴循環'},{icon:'✨',text:'保養吸收效果倍增'}]},
+    {id:14,cat:'set',name:'玫瑰彤妍系列套組',emoji:'🌹',image:'',price:49500,origPrice:0,badge:'套組優惠',shortDesc:'玫瑰精油全系列保養四步驟：潔膚乳→精華液→精華乳霜→眼部精華，附贈美妍館12次服務',tags:['玫瑰精油','完整四步','美妍館12次','套組優惠'],intro:'玫瑰彤妍系列套組包含：玫瑰滋養形妍靚麗潔膚乳×2瓶、精華液×2瓶、精華乳霜×2瓶、眼部精華×1瓶，完整玫瑰精油保養流程。附贈美妍館12次服務，美容師搭配經絡撥筋手法促進深層吸收，行氣活血、改善淋巴循環。',ingredients:'套組包含：玫瑰滋養形妍靚麗潔膚乳×2、精華液×2、精華乳霜×2、眼部精華×1',howToUse:'【早晚流程】潔膚乳→精華液→精華乳霜→眼部精華。\n【美妍館服務】憑購買憑證預約12次（效期2年）。',cautions:'・套組商品不接受拆售\n・美妍館服務效期2年',highlights:[{icon:'🌹',text:'珍貴玫瑰精油全系列'},{icon:'💧',text:'完整四步保養流程'},{icon:'💆',text:'美妍館12次服務'},{icon:'✨',text:'透亮嬌嫩玫瑰肌'}]},
+    {id:15,cat:'set',name:'形妍靚麗系列套組',emoji:'🌸',image:'',price:39000,origPrice:0,badge:'套組優惠',shortDesc:'草本帶氧高滲透系列：卸妝乳→精華液→精華乳霜三步到位，附贈美妍館12次服務',tags:['草本帶氧','高滲透','美妍館12次','套組優惠'],intro:'形妍靚麗系列套組包含：卸妝乳×2瓶、精華液×2瓶、精華乳霜×2瓶，草本帶氧高滲透配方直達底層，銀耳多醣植物胎盤修護。附贈美妍館12次服務，行氣活血改善淋巴循環。',ingredients:'套組包含：形妍靚麗卸妝乳×2、精華液×2、精華乳霜×2',howToUse:'【每日保養】卸妝乳→精華液→精華乳霜。\n【美妍館服務】憑購買憑證預約12次（效期2年）。',cautions:'・套組商品不接受拆售\n・美妍館服務效期2年',highlights:[{icon:'🌸',text:'草本帶氧高滲透'},{icon:'🌿',text:'銀耳多醣植物胎盤'},{icon:'💆',text:'美妍館12次服務'},{icon:'✨',text:'肌膚柔滑潤澤光采'}]},
+    {id:16,cat:'set',name:'蒂芳妮銀璽套組',emoji:'💍',image:'',price:28000,origPrice:0,badge:'套組優惠',shortDesc:'銀璽面膜×美白潔顏×深層調理完整體驗，附贈美妍館12次服務',tags:['銀璽面膜','美白調理','美妍館12次','套組優惠'],intro:'蒂芳妮銀璽套組包含：神秘面紗靚麗銀面膜×2盒、尊愛風華洗顏乳×2、晶漾胺基酸潔面乳×2、精采顏值美膚液×2，完整美白潔顏調理流程。附贈美妍館12次服務，經絡撥筋行氣活血改善淋巴循環。',ingredients:'套組包含：神秘面紗靚麗銀面膜×2盒（各6片）、尊愛風華洗顏乳×2、晶漾胺基酸潔面乳×2、精采顏值美膚液×2',howToUse:'【每日保養】潔面乳→美膚液→每週2-3次敷銀面膜。\n【美妍館服務】憑購買憑證預約12次（效期2年）。',cautions:'・套組商品不接受拆售\n・美妍館服務效期2年',highlights:[{icon:'💍',text:'銀璽面膜密集修護'},{icon:'✨',text:'美白潔顏全程呵護'},{icon:'💆',text:'美妍館12次服務'},{icon:'🔆',text:'行氣活血淋巴循環'}]},
+    {id:17,cat:'set',name:'美麗人生靚白系列套組',emoji:'🍀',image:'',price:18000,origPrice:0,badge:'套組優惠',shortDesc:'薏仁草本美白完整流程：洗顏→美膚液→靚白面膜，附贈美妍館12次服務',tags:['草本美白','薏仁靚白','美妍館12次','套組優惠'],intro:'美麗人生靚白系列套組包含：靚白洗顏乳×2、靚白美膚液×2、靚白面膜×1盒（30片），從清潔、保養到密集面膜完整美白修護。附贈美妍館12次服務，行氣活血改善淋巴循環。',ingredients:'套組包含：美麗人生靚白洗顏乳×2、美麗人生靚白美膚液×2、美麗人生靚白面膜×1盒（30片）',howToUse:'【每日保養】靚白洗顏乳→靚白美膚液→每晚靚白面膜（可連敷14天密集美白）。\n【美妍館服務】憑購買憑證預約12次（效期2年）。',cautions:'・套組商品不接受拆售\n・美妍館服務效期2年',highlights:[{icon:'🍀',text:'白薏仁草本美白'},{icon:'🌊',text:'白木耳石斛深層保水'},{icon:'💆',text:'美妍館12次服務'},{icon:'✨',text:'滑嫩透白自然光采'}]},
+    // 香氛系列
+    {id:18,cat:'skin',name:'七星香氛精油 100ml',emoji:'⭐',image:'',price:3800,origPrice:0,badge:'',shortDesc:'七星靈氣調香，草本蒸餾精粹，為空間與身心注入純淨清透的能量',tags:['七星調香','草本蒸餾','精油香氛','身心平衡'],intro:'七星香氛精油以七種精選草本蒸餾萃取為核心，調和天地靈氣，香氣清透悠遠，用於室內香氛或稀釋肌膚護理，帶來身心舒緩平衡。',ingredients:'天然植物精油（七星草本蒸餾複方）、植物基底油',howToUse:'【室內香氛】水氧機加3-8滴。\n【肌膚護理】1:10稀釋後按摩。',cautions:'・請勿未稀釋直接塗抹肌膚\n・孕婦請詢問醫師',highlights:[{icon:'⭐',text:'七星草本調香'},{icon:'🌿',text:'純淨蒸餾精粹'},{icon:'🌬️',text:'身心平衡舒緩'},{icon:'💆',text:'室內肌膚雙用途'}]},
+    {id:19,cat:'skin',name:'龍淵香氛精油 100ml',emoji:'🌊',image:'',price:3800,origPrice:0,badge:'',shortDesc:'龍淵深邃氣息，草本調香，深沉穩定，淨化空氣提振精神',tags:['龍淵調香','深邃穩定','精油香氛','淨化提振'],intro:'龍淵香氛精油融合深邃草本精粹，氣息沉穩，淨化空間負能量，令人精神一振，適合工作室、冥想空間使用。',ingredients:'天然植物精油（龍淵草本蒸餾複方）、植物基底油',howToUse:'【室內香氛】水氧機加3-8滴。\n【按摩護理】1:10稀釋後使用。',cautions:'・請稀釋後使用於肌膚\n・避免接觸眼睛',highlights:[{icon:'🌊',text:'龍淵深邃氣息'},{icon:'🌿',text:'草本淨化精粹'},{icon:'🧘',text:'冥想工作室適用'},{icon:'⚡',text:'提振精神活力'}]},
+    {id:20,cat:'skin',name:'赤霄香氛精油 100ml',emoji:'🔥',image:'',price:3800,origPrice:0,badge:'',shortDesc:'赤霄火陽調香，溫暖辛香草本，溫通經絡活血促進循環',tags:['赤霄調香','溫通活血','精油香氛','促進循環'],intro:'赤霄香氛精油以溫暖辛香草本為基調，用於按摩可溫通經絡、促進血液循環，適合冬日保養或運動後修護。',ingredients:'天然植物精油（赤霄草本蒸餾複方）、植物基底油',howToUse:'【室內香氛】水氧機加3-8滴。\n【按摩護理】1:10稀釋後按摩。',cautions:'・稀釋後使用\n・孕婦避免使用',highlights:[{icon:'🔥',text:'赤霄溫暖火陽調香'},{icon:'🌿',text:'活血溫通經絡'},{icon:'❄️',text:'冬日保養首選'},{icon:'💪',text:'運動後修護'}]},
+    {id:21,cat:'skin',name:'承影香氛精油 100ml',emoji:'🌙',image:'',price:3800,origPrice:0,badge:'',shortDesc:'承影月光調香，清幽神秘草本，舒緩壓力安撫情緒，夜間放鬆首選',tags:['承影調香','舒緩壓力','精油香氛','夜間放鬆'],intro:'承影香氛精油取材清幽神秘月光草本香調，特別適合睡前使用，幫助舒緩日間壓力，安撫情緒，引導進入深層休息狀態。',ingredients:'天然植物精油（承影草本蒸餾複方）、植物基底油',howToUse:'【睡前香氛】臥室水氧機加3-5滴。\n【壓力舒緩】稀釋後按摩肩頸。',cautions:'・稀釋後使用\n・白天使用可能引起嗜睡',highlights:[{icon:'🌙',text:'承影月光神秘調香'},{icon:'🕊️',text:'舒緩壓力安撫情緒'},{icon:'😴',text:'睡前放鬆首選'},{icon:'🌿',text:'夜間深層休息'}]},
+    {id:22,cat:'skin',name:'干將香氛精油 100ml',emoji:'💚',image:'',price:3800,origPrice:0,badge:'',shortDesc:'干將木質調香，清新草木精粹，提振活力平衡身心，居家辦公適用',tags:['干將調香','木質清新','精油香氛','提振活力'],intro:'干將香氛精油以清新木質草本為基調，能清新空氣、提振精神，適合居家或辦公空間使用，維持清醒專注。',ingredients:'天然植物精油（干將草本蒸餾複方）、植物基底油',howToUse:'【居家辦公】水氧機加3-8滴。\n【提神醒腦】稀釋後按摩太陽穴。',cautions:'・稀釋後使用\n・避免接觸眼睛',highlights:[{icon:'💚',text:'干將木質清新調香'},{icon:'🌿',text:'提振精神清新空氣'},{icon:'🖥️',text:'居家辦公專屬'},{icon:'⚡',text:'維持清醒專注'}]},
+    {id:23,cat:'skin',name:'莫邪香氛精油 100ml',emoji:'🌺',image:'',price:3800,origPrice:0,badge:'',shortDesc:'莫邪花香調香，柔美馥郁草本，提升氛圍愉悅心情，空間保養兩用',tags:['莫邪調香','花香馥郁','精油香氛','愉悅心情'],intro:'莫邪香氛精油以柔美馥郁花香草本調為基礎，讓空間充滿愉悅花香，稀釋後也可用於肌膚護理。',ingredients:'天然植物精油（莫邪草本蒸餾複方）、植物基底油',howToUse:'【空間香氛】水氧機加3-8滴。\n【肌膚護理】1:10稀釋後使用。',cautions:'・稀釋後使用\n・孕婦請詢問醫師',highlights:[{icon:'🌺',text:'莫邪馥郁花香調'},{icon:'💕',text:'愉悅心情提振情緒'},{icon:'🌸',text:'空間肌膚雙用途'},{icon:'🌿',text:'天然草本蒸餾精粹'}]},
+    // 清潔系列
+    {id:24,cat:'skin',name:'尊愛風華洗顏乳 120ml',emoji:'🧴',image:'',price:800,origPrice:0,badge:'',shortDesc:'草本親膚洗顏配方，深層潔淨同時滋養，洗後滑嫩不緊繃',tags:['草本洗顏','深層潔淨','溫和配方','全膚質'],intro:'尊愛風華洗顏乳採用親膚草本複合配方，有效潔淨臉部皮脂與塵垢，洗後肌膚細嫩光滑無緊繃感。',ingredients:'草本萃取液（金銀花、西洋參、玉竹、蘆薈）、Sodium Cocoyl Glutamate、Glycerine、Aqua',howToUse:'取適量加水起泡，按摩30秒後清水沖洗，早晚使用。',cautions:'・避免接觸眼睛\n・置於兒童不易取得處',highlights:[{icon:'🌿',text:'親膚草本配方'},{icon:'💧',text:'溫和深層潔淨'},{icon:'✨',text:'洗後滑嫩不緊繃'},{icon:'🌸',text:'四季全膚質適用'}]},
+    {id:25,cat:'skin',name:'潤白角質膠 50ml',emoji:'🌟',image:'',price:900,origPrice:0,badge:'',shortDesc:'溫和去除老廢角質，膚色透亮嫩白，提升保養品吸收力',tags:['去角質','透亮美白','溫和凝膠','提升吸收'],intro:'潤白角質膠以溫和凝膠質地有效溶解老廢角質，促進肌膚新陳代謝，提升後續保養品的吸收效率。',ingredients:'草本萃取液（白薏仁、白茅根、甘草）、植物纖維素、Aqua',howToUse:'潔膚後取適量塗抹臉部（避開眼周），輕柔畫圓1-2分鐘後沖洗，每週1-2次。',cautions:'・每週1-2次為限\n・使用後做好保濕防曬',highlights:[{icon:'✨',text:'溫和去除老廢角質'},{icon:'💎',text:'透亮均勻膚色'},{icon:'🌿',text:'草本美白精華'},{icon:'⬆️',text:'提升保養吸收力'}]},
+    {id:26,cat:'skin',name:'潔膚液 400ml',emoji:'💧',image:'',price:1600,origPrice:0,badge:'',shortDesc:'大容量草本潔膚液，快速溶解彩妝油脂，溫和不刺激',tags:['大容量','草本潔膚','卸妝潔淨','溫和不刺激'],intro:'潔膚液以大容量設計，草本溫和配方能快速溶解彩妝及油脂，潔淨力強而不刺激。',ingredients:'草本萃取液（荷葉、金銀花、蘆薈）、PEG-7 Glyceryl Cocoate、Aqua',howToUse:'以化妝棉沾取輕柔擦拭至無殘妝，建議再以洗顏乳做二次清潔。',cautions:'・避免入眼\n・置於陰涼乾燥處',highlights:[{icon:'💧',text:'400ml大容量設計'},{icon:'🌿',text:'草本溫和配方'},{icon:'✨',text:'快速溶解彩妝'},{icon:'👁️',text:'溫和不刺激眼周'}]},
+    {id:27,cat:'skin',name:'晶漾膠原卸妝乳 120ml',emoji:'🌷',image:'',price:900,origPrice:0,badge:'',shortDesc:'膠原蛋白精華卸妝乳，卸妝同時補充膠原，溫和潔淨不乾澀',tags:['膠原蛋白','卸妝乳','保濕卸妝','緊緻保養'],intro:'晶漾膠原卸妝乳融合天然膠原蛋白精華，有效卸除彩妝的同時補充膠原，提升肌膚緊緻度，卸妝後不乾澀。',ingredients:'草本萃取液（玉竹、天冬）、水解膠原蛋白、PEG-7 Glyceryl Cocoate、Aqua',howToUse:'取適量於乾燥肌膚，按摩至彩妝溶解，加水乳化後沖洗。',cautions:'・避免接觸眼睛\n・開封後六個月內使用',highlights:[{icon:'🌷',text:'膠原蛋白卸妝保養'},{icon:'💧',text:'卸妝補濕同步進行'},{icon:'✨',text:'緊緻滑嫩不乾澀'},{icon:'🌿',text:'草本溫和潔淨'}]},
+    // 調理系列
+    {id:28,cat:'skin',name:'調理舒緩洗顏乳 100ml',emoji:'🌱',image:'',price:1200,origPrice:0,badge:'',shortDesc:'敏感調理配方，溫和舒緩洗顏，改善肌膚不穩定狀態',tags:['調理配方','舒緩敏感','溫和清潔','肌膚穩定'],intro:'調理舒緩洗顏乳專為敏感及需調理的肌膚設計，積雪草草本複方有效舒緩不適，清潔同時調理，長期使用改善肌膚不穩定狀態。',ingredients:'草本萃取液（積雪草、蒲公英、洋甘菊、蘆薈）、Sodium Cocoyl Alaninate、Glycerine、Aqua',howToUse:'取適量加水起泡，輕柔按摩30秒後沖洗，早晚使用。',cautions:'・極度敏感肌請先做測試\n・如有不適立即停用',highlights:[{icon:'🌱',text:'積雪草舒緩調理'},{icon:'🤍',text:'舒緩肌膚不穩定'},{icon:'💧',text:'溫和深層潔淨'},{icon:'🌿',text:'長期調理改善'}]},
+    {id:29,cat:'skin',name:'調理舒緩液 200ml',emoji:'🌱',image:'',price:1200,origPrice:0,badge:'',shortDesc:'調理化妝水深入滲透，平衡肌膚油脂，舒緩紅腫改善膚況',tags:['調理化妝水','舒緩紅腫','肌膚平衡','調理膚況'],intro:'調理舒緩液以積雪草、蒲公英等草本為核心，清爽質地快速滲透，平衡油脂分泌，舒緩紅腫不適，持續使用後肌膚狀況更加穩定。',ingredients:'草本萃取液（積雪草、蒲公英、洋甘菊、金銀花、蘆薈）、Sodium Hyaluronate、Aqua',howToUse:'潔膚後取適量以化妝棉輕拍或手掌拍按至吸收，再進行後續保養，早晚使用。',cautions:'・避免接觸眼周\n・開封後六個月內使用',highlights:[{icon:'🌱',text:'積雪草舒緩精華'},{icon:'💧',text:'平衡肌膚油脂'},{icon:'🌸',text:'舒緩紅腫不適'},{icon:'✨',text:'穩定均勻膚況'}]},
+    {id:30,cat:'skin',name:'調理舒緩乳液 150ml',emoji:'🌱',image:'',price:1800,origPrice:0,badge:'',shortDesc:'輕盈乳液，保濕調理兼備，敏感肌也能安心使用',tags:['調理乳液','輕盈保濕','敏感適用','全日護理'],intro:'調理舒緩乳液質地輕盈清爽，快速滲透不黏膩，保濕調理兼備，特別適合敏感肌日常使用，全日持續調理護膚。',ingredients:'草本萃取液（積雪草、蒲公英、洋甘菊）、Sodium Hyaluronate、甘草酸鉀、Glycerine、Aqua',howToUse:'化妝水後取適量塗抹全臉及頸部，輕柔按摩至吸收，早晚使用。',cautions:'・敏感肌初次使用請先做測試\n・置於陰涼乾燥處',highlights:[{icon:'🌱',text:'調理舒緩複合草本'},{icon:'💧',text:'輕盈快速滲透'},{icon:'🤍',text:'敏感肌安心使用'},{icon:'✨',text:'全日舒適護理'}]},
+    // 面膜系列
+    {id:31,cat:'skin',name:'美麗人生靚白面膜 30片',emoji:'🌿',image:'',price:4200,origPrice:0,badge:'熱銷',shortDesc:'白薏仁草本美白面膜30片，連續14天明顯透亮，CP值極高',tags:['靚白面膜','白薏仁','連續美白','30片大容量'],intro:'美麗人生靚白面膜以白薏仁、小黃瓜、蘆薈為主要美白保濕成分，每片含豐富草本美白精華液，連續使用14天可明顯改善膚色不均。',ingredients:'草本萃取（白薏仁、黃豆、冬瓜、蘋果）、蘆薈液、小黃瓜液、Sodium Hyaluronate、Aqua',howToUse:'潔膚後取出面膜貼敷20-30分鐘，取下後輕拍至精華液完全吸收，每天1片連續14天密集美白。',cautions:'・取出後請冷藏保存\n・勿重複使用',highlights:[{icon:'🌿',text:'白薏仁草本美白'},{icon:'💎',text:'30片超值大容量'},{icon:'⭐',text:'連續14天密集美白'},{icon:'💧',text:'蘆薈保濕精華'}]},
+    {id:32,cat:'skin',name:'形妍靚麗活膚精萃面膜 6片×3瓶',emoji:'🌸',image:'',price:2400,origPrice:0,badge:'',shortDesc:'草本帶氧活膚精萃面膜，高滲透配方，敷後即刻透亮水嫩飽滿',tags:['活膚精萃','草本帶氧','即效保濕','6片×3組'],intro:'形妍靚麗活膚精萃面膜以草本帶氧高滲透配方浸透，精華液快速滲入底層，即刻帶來透亮水嫩飽滿的感受。',ingredients:'草本萃取液（白薏仁、天冬、茯苓、山藥）、植物膠、海藻精華、Sodium Hyaluronate、Aqua',howToUse:'潔膚後取出面膜貼敷15-20分鐘，取下後按摩吸收剩餘精華，每週2-3次。',cautions:'・使用後冷藏保存\n・敏感肌初次使用縮短時間',highlights:[{icon:'🌸',text:'草本帶氧活膚配方'},{icon:'💧',text:'即效透亮補水'},{icon:'🌿',text:'高滲透滲入底層'},{icon:'✨',text:'飽滿水潤肌膚'}]},
+    {id:33,cat:'skin',name:'豐潤調理敷膜泥 100ml',emoji:'🌍',image:'',price:1800,origPrice:0,badge:'',shortDesc:'天然泥膜深層淨化毛孔，收斂調理肌膚，使用後光滑細膩',tags:['泥膜','深層淨化','收斂毛孔','調理肌膚'],intro:'豐潤調理敷膜泥以天然礦物泥為基底，添加草本調理精華，深層吸附毛孔油脂雜質，收斂毛孔，使用後肌膚光滑細膩。',ingredients:'天然礦物泥、草本萃取（積雪草、綠茶、金銀花）、白陶土、Glycerine、Aqua',howToUse:'潔膚後均勻塗抹全臉（避開眼周），靜待10-15分鐘至半乾後沖洗，每週1-2次。',cautions:'・勿讓泥膜完全乾透\n・使用後補充保濕',highlights:[{icon:'🌍',text:'天然礦物泥配方'},{icon:'🔍',text:'深層淨化毛孔'},{icon:'🌿',text:'草本收斂調理'},{icon:'✨',text:'光滑細膩透亮'}]},
+    {id:34,cat:'skin',name:'神秘面紗賦活經典金面膜 6片',emoji:'🥇',image:'',price:2700,origPrice:0,badge:'頂級',shortDesc:'頂級金箔賦活面膜，漢方精華密集修護，使用後即現皇室光彩',tags:['金箔面膜','頂級賦活','密集修護','皇室光彩'],intro:'神秘面紗賦活經典金面膜融合24K金箔與頂級漢方草本精華，深度修護肌膚底層，使用後即刻感受緊緻透亮，散發皇室般的金緻光彩。',ingredients:'漢方草本萃取複合液（人參、當歸、玉竹、靈芝）、24K金箔、Sodium Hyaluronate、水解膠原蛋白',howToUse:'潔膚後取出金面膜貼敷25-30分鐘，取下後按摩吸收剩餘精華，每週1-2次。',cautions:'・使用後冷藏保存\n・首次使用請測試',highlights:[{icon:'🥇',text:'24K金箔頂級精華'},{icon:'🌿',text:'漢方草本密集修護'},{icon:'✨',text:'即刻緊緻透亮'},{icon:'👑',text:'皇室金緻光彩'}]},
+    {id:35,cat:'skin',name:'神秘面紗靚麗經典銀面膜 6片',emoji:'🥈',image:'',price:2700,origPrice:0,badge:'精選',shortDesc:'銀離子保濕靚麗面膜，抗菌清淨同時深層補水，使用後透亮細嫩',tags:['銀離子面膜','抗菌保濕','靚麗透亮','深層補水'],intro:'神秘面紗靚麗銀面膜以銀離子精華與漢方草本保濕成分結合，銀離子抗菌淨化，高濃度保濕精華深層補水，使用後清淨透亮細嫩。',ingredients:'漢方草本萃取複合液（白薏仁、蒲公英、金銀花）、銀離子溶液、Sodium Hyaluronate、白木耳多醣',howToUse:'潔膚後取出銀面膜貼敷20-25分鐘，取下後按摩吸收，每週2-3次效果最佳。',cautions:'・對銀過敏者請勿使用\n・冷藏保存\n・勿重複使用',highlights:[{icon:'🥈',text:'銀離子抗菌淨化'},{icon:'💧',text:'高濃度深層補水'},{icon:'✨',text:'透亮細嫩靚麗'},{icon:'🌿',text:'漢方草本保濕精華'}]},
+    // 彩妝系列
+    {id:36,cat:'skin',name:'神采魅影粉底液 01F 30ml',emoji:'💄',image:'',price:2800,origPrice:0,badge:'',shortDesc:'自然亮膚色號，草本護膚粉底，輕薄服貼遮瑕持妝',tags:['粉底液','自然膚色','草本護膚','輕薄服貼'],intro:'神采魅影粉底液01F（自然亮膚）以草本護膚成分融入配方，輕薄服貼提供適度遮瑕，透亮自然裸妝感，上妝同時護膚。',ingredients:'草本萃取液（蘆薈、玉竹）、Cyclopentasiloxane、Titanium Dioxide、Iron Oxides、Aqua',howToUse:'以指尖或粉底刷均勻推開，由內往外推匀至全臉，搭配飾底乳增加持妝效果。',cautions:'・請做肌膚測試\n・確實卸妝',highlights:[{icon:'💄',text:'自然亮膚01F色號'},{icon:'🌿',text:'草本護膚成分'},{icon:'✨',text:'輕薄服貼透亮'},{icon:'🌸',text:'上妝護膚同步進行'}]},
+    {id:37,cat:'skin',name:'神采魅影粉底液 02F 30ml',emoji:'💄',image:'',price:2800,origPrice:0,badge:'',shortDesc:'自然裸膚色號，適合偏黃膚色，均勻修飾膚色草本持妝',tags:['粉底液','偏黃膚色','草本護膚','均勻修飾'],intro:'神采魅影粉底液02F（自然裸膚）調配適合偏黃或偏深膚色，均勻修飾膚色，輕薄透氣服貼，草本護膚成分讓肌膚透氣有光澤。',ingredients:'草本萃取液（蘆薈、玉竹）、Cyclopentasiloxane、Titanium Dioxide、Iron Oxides、Aqua',howToUse:'以指尖或粉底刷均勻推開至全臉，搭配飾底乳增加效果。',cautions:'・確實卸妝\n・置於陰涼乾燥處',highlights:[{icon:'💄',text:'偏黃裸膚02F色號'},{icon:'🌿',text:'草本護膚配方'},{icon:'✨',text:'均勻修飾膚色'},{icon:'💆',text:'透氣服貼有光澤'}]},
+    {id:38,cat:'skin',name:'飾底乳 10P 30ml',emoji:'🎨',image:'',price:2000,origPrice:0,badge:'',shortDesc:'粉紅調修色飾底乳，均勻膚色遮瑕，延長粉底持妝效果',tags:['飾底乳','修色調整','延長持妝','粉紅調'],intro:'飾底乳10P（粉紅調）有效修正暗沉泛黃，塗抹於粉底液前讓膚色更均勻透亮，同時延長持妝時間。',ingredients:'草本萃取液（蘆薈）、Cyclopentasiloxane、Titanium Dioxide、Pink Iron Oxides、Aqua',howToUse:'日常保養後取少量均勻塗抹全臉，待吸收後再上粉底液。',cautions:'・確實卸妝\n・置於陰涼乾燥處',highlights:[{icon:'🎨',text:'粉紅調修色飾底'},{icon:'✨',text:'修正暗沉泛黃'},{icon:'⏱️',text:'延長持妝效果'},{icon:'💄',text:'上妝必備打底'}]},
+    {id:39,cat:'skin',name:'蜜粉餅 004 8g',emoji:'🌸',image:'',price:2500,origPrice:0,badge:'',shortDesc:'輕透定妝蜜粉餅，柔焦毛孔不浮粉，長效維持清新完妝',tags:['定妝蜜粉','輕透柔焦','長效定妝','不浮粉'],intro:'蜜粉餅004以超細緻粉質與草本控油成分結合，輕薄透氣柔焦毛孔，全天保持清新完妝感，攜帶方便隨時補妝。',ingredients:'草本萃取（金縷梅）、Talc、Mica、Silica、Titanium Dioxide、Nylon-12',howToUse:'粉底後以粉撲取少量輕壓全臉定妝，外出補妝時輕按需要部位。',cautions:'・置於乾燥處\n・避免受潮',highlights:[{icon:'🌸',text:'超細緻蜜粉配方'},{icon:'✨',text:'柔焦毛孔不浮粉'},{icon:'⏰',text:'全天長效定妝'},{icon:'👜',text:'攜帶方便隨時補妝'}]},
+    {id:40,cat:'skin',name:'顏彩盤 002',emoji:'🎨',image:'',price:3000,origPrice:0,badge:'',shortDesc:'多色協調顏彩盤，眼影腮紅修容整合，日常到晚妝無限造型',tags:['顏彩盤','多功能彩妝','眼影腮紅','日晚妝通用'],intro:'顏彩盤002整合多款協調色彩，包含眼影、腮紅及修容色，一盤完成日常到晚宴多樣造型，色彩飽和服貼持久。',ingredients:'Mica、Talc、Silica、Iron Oxides、Titanium Dioxide、Magnesium Stearate',howToUse:'以眼影刷取眼影→腮紅刷掃腮紅→修容刷輪廓打亮，疊擦可加深或暈染漸層。',cautions:'・確實卸妝\n・置於陰涼乾燥處',highlights:[{icon:'🎨',text:'多色協調顏彩設計'},{icon:'👁️',text:'眼影腮紅修容三合一'},{icon:'✨',text:'飽和顯色持久服貼'},{icon:'💄',text:'日常晚宴造型無限'}]},
+    // 舒緩精油系列
+    {id:41,cat:'skin',name:'五行精油組 10ml×5瓶',emoji:'🔮',image:'',price:12500,origPrice:0,badge:'明星商品',shortDesc:'金木水火土五行精油套組，對應五臟六腑，全方位平衡身心',tags:['五行精油','五臟調理','身心平衡','10ml×5瓶'],intro:'五行精油組以金、木、水、火、土五行理論為基礎，精選對應五臟六腑的天然草本精油，全套五瓶全方位平衡身心，可搭配美妍館經絡撥筋使用效果倍增。',ingredients:'五行草本精油複方：金行（廣藿香、岩蘭草）、木行（薄荷、茶樹）、水行（雪松、杜松）、火行（玫瑰、天竺葵）、土行（薰衣草、甘菊）',howToUse:'【芳療嗅吸】水氧機加3-5滴。\n【按摩調理】稀釋10倍後按摩對應部位。\n【沐浴】加5-8滴於浴缸。',cautions:'・請稀釋後使用\n・孕婦請詢問醫師\n・避免接觸眼睛',highlights:[{icon:'🔮',text:'五行對應五臟精油'},{icon:'⚖️',text:'全方位身心平衡'},{icon:'💆',text:'搭配經絡按摩效果佳'},{icon:'🌿',text:'天然草本蒸餾精粹'}]},
+    {id:42,cat:'skin',name:'覺醒精油 10ml',emoji:'🌿',image:'',price:1800,origPrice:0,badge:'',shortDesc:'清新提振精油，喚醒活力，快速舒緩疲勞改善精神狀態',tags:['覺醒精油','提振活力','舒緩疲勞','清新喚醒'],intro:'覺醒精油以多種清新提振草本精油調配，香氣清爽穿透力強，快速喚醒疲倦身心，適合早晨提神或午後恢復活力。',ingredients:'天然植物精油（薄荷、迷迭香、尤加利、檸檬草、薑）複方',howToUse:'【提神】水氧機加3-5滴或開蓋嗅吸。\n【按摩】1:10稀釋後按摩肩頸太陽穴。',cautions:'・勿直接接觸肌膚（需稀釋）\n・孕婦禁用',highlights:[{icon:'🌿',text:'清新提振草本複方'},{icon:'⚡',text:'快速喚醒疲倦身心'},{icon:'🌅',text:'早晨午後皆適用'},{icon:'💆',text:'舒緩頭部肩頸疲勞'}]},
+    {id:43,cat:'skin',name:'芋巧魅麗舒活乳 250ml',emoji:'💜',image:'',price:1200,origPrice:0,badge:'',shortDesc:'芋頭精華舒活乳液，深層滋潤全身，舒緩肌肉緊張與疲勞',tags:['芋頭精華','舒活乳液','全身保濕','舒緩肌肉'],intro:'芋巧魅麗舒活乳以天然芋頭精華結合草本舒緩成分，質地清爽不黏膩，深層滋潤全身肌膚，舒緩肌肉緊張與疲勞。',ingredients:'芋頭萃取液、草本精油（薰衣草、甘菊）、Glycerine、Sodium Hyaluronate、Shea Butter、Aqua',howToUse:'沐浴後取適量均勻塗抹全身，輕柔按摩至完全吸收，重點按摩疲勞部位。',cautions:'・對芋頭過敏者請勿使用\n・避免接觸眼睛',highlights:[{icon:'💜',text:'天然芋頭精華成分'},{icon:'🌿',text:'草本精油舒緩配方'},{icon:'💆',text:'舒緩肌肉緊張疲勞'},{icon:'✨',text:'全身深層滋潤'}]},
+    // 頭皮保養系列
+    {id:44,cat:'hair',name:'頭皮通暢晶露 150ml',emoji:'💧',image:'',price:990,origPrice:0,badge:'',shortDesc:'草本頭皮精華晶露，疏通毛囊活化頭皮，改善悶熱與出油',tags:['頭皮晶露','疏通毛囊','活化頭皮','控油平衡'],intro:'頭皮通暢晶露以草本疏通配方深入毛囊，活化頭皮微循環，舒緩頭皮悶熱出油、毛囊堵塞，使用後清爽舒暢，為健康秀髮提供最佳環境。',ingredients:'草本萃取液（迷迭香、薄荷、茶樹、生薑）、Panthenol、Biotin、Aqua',howToUse:'洗髮後取適量均勻塗抹頭皮，以指腹按摩5分鐘，無需沖洗，早晚使用效果更佳。',cautions:'・請勿塗抹於頭髮\n・頭皮有傷口請停用',highlights:[{icon:'💧',text:'草本疏通毛囊精華'},{icon:'🌿',text:'活化頭皮微循環'},{icon:'✨',text:'清爽舒暢無需沖洗'},{icon:'🌱',text:'為秀髮奠定健康基礎'}]},
+    {id:45,cat:'hair',name:'香波悠然髮麗絲護髮膜 250ml',emoji:'💆',image:'',price:990,origPrice:0,badge:'',shortDesc:'深層修護護髮膜，滋潤受損髮質，讓秀髮柔順光澤有彈力',tags:['護髮膜','深層修護','柔順光澤','受損修護'],intro:'香波悠然髮麗絲護髮膜以高濃度護髮精華深層滲透，修護乾燥燙染受損髮質，補充蛋白質與水分，使用後秀髮柔順光澤，梳理不打結。',ingredients:'水解蠶絲蛋白、椰子油、摩洛哥堅果油、Panthenol、Keratin、草本萃取（側柏、何首烏）、Aqua',howToUse:'洗髮後擰乾，取適量均勻塗抹髮尾及受損部位，靜待5-10分鐘後徹底沖洗，每週2-3次。',cautions:'・使用後請徹底沖洗\n・避免接觸眼睛',highlights:[{icon:'💆',text:'高濃度護髮精華'},{icon:'🌿',text:'何首烏側柏草本'},{icon:'✨',text:'柔順光澤不打結'},{icon:'🔬',text:'深層修護燙染髮'}]},
+    {id:46,cat:'hair',name:'髮麗絲養護液 200ml',emoji:'🌿',image:'',price:960,origPrice:0,badge:'',shortDesc:'免洗養護液，護色保濕一步完成，保護染燙髮持久光澤',tags:['免洗護髮','護色保濕','染燙保護','持久光澤'],intro:'髮麗絲養護液是免沖洗型護髮精品，能有效護色保濕，保護染燙脆弱髮質，持久維持秀髮光澤與彈力，是忙碌日常護髮首選。',ingredients:'水解蠶絲蛋白、Panthenol、Dimethicone、草本萃取（何首烏、側柏）、Aqua',howToUse:'洗髮後取適量均勻塗抹全部頭髮，梳理均勻，無需沖洗直接吹整造型，每次洗髮後使用。',cautions:'・免沖洗型，請勿過量\n・置於陰涼乾燥處',highlights:[{icon:'🌿',text:'免洗護色保濕一步'},{icon:'✨',text:'保護染燙脆弱髮質'},{icon:'💆',text:'持久光澤彈力'},{icon:'⚡',text:'忙碌日常護髮首選'}]},
+    {id:47,cat:'hair',name:'靚養髮精 250ml',emoji:'🌱',image:'',price:600,origPrice:0,badge:'',shortDesc:'草本養髮精華洗髮露，溫和清潔同時深層滋養髮根，促進秀髮生長',tags:['養髮洗髮','深層滋養','草本促進','溫和清潔'],intro:'靚養髮精以草本養髮精華配方，溫和清潔的同時深層滋養髮根，刺激頭皮微循環，促進秀髮健康生長，適合髮量稀疏、落髮困擾者長期使用。',ingredients:'草本萃取（何首烏、生薑、側柏、人參）、Biotin、Panthenol、Sodium Lauryl Glutamate、Aqua',howToUse:'溫水濕潤頭髮，取適量搓起泡沫按摩頭皮，靜待2-3分鐘後沖洗，每日或隔日使用。',cautions:'・避免接觸眼睛\n・置於兒童不易取得處',highlights:[{icon:'🌱',text:'草本養髮精華洗髮'},{icon:'💧',text:'深層滋養髮根'},{icon:'⬆️',text:'促進秀髮健康生長'},{icon:'🌿',text:'何首烏人參草本複方'}]},
+    {id:48,cat:'hair',name:'保濕護髮露 200ml',emoji:'💦',image:'',price:680,origPrice:0,badge:'',shortDesc:'輕盈保濕護髮露，維持髮絲水潤彈性，減少靜電毛躁',tags:['保濕護髮','減少毛躁','輕盈水潤','靜電控制'],intro:'保濕護髮露以輕盈配方為乾燥髮絲補充水分，維持整日水潤彈性，有效減少靜電與毛躁，保持自然服貼的輕盈感。',ingredients:'Panthenol、Glycerine、Dimethicone、水解蠶絲蛋白、草本萃取（蘆薈）、Aqua',howToUse:'洗髮後取適量均勻塗抹頭髮，梳理均勻無需沖洗，直接吹整造型，每日使用。',cautions:'・過量使用可能使頭髮油膩\n・置於陰涼乾燥處',highlights:[{icon:'💦',text:'輕盈水潤補水配方'},{icon:'✨',text:'減少靜電毛躁'},{icon:'🌿',text:'蘆薈滋潤精華'},{icon:'💆',text:'全日自然服貼'}]},
+    {id:49,cat:'hair',name:'亮采護髮素 200ml',emoji:'⭐',image:'',price:680,origPrice:0,badge:'',shortDesc:'漢方亮采護髮素，使用後秀髮光澤倍增，色澤更鮮亮持久',tags:['亮采護髮','光澤倍增','漢方配方','護色亮澤'],intro:'亮采護髮素以漢方亮澤草本配方，為每根秀髮增添閃亮光澤，特別適合染色髮或乾澀髮質，用後光澤倍增，色澤更持久。',ingredients:'草本萃取（側柏、何首烏、山茶花）、水解蠶絲蛋白、Panthenol、Dimethicone、Aqua',howToUse:'洗髮後均勻塗抹全部頭髮，靜待3-5分鐘後清水沖洗，每次洗髮後使用。',cautions:'・請徹底沖洗\n・避免接觸眼睛',highlights:[{icon:'⭐',text:'漢方亮澤草本配方'},{icon:'✨',text:'光澤倍增閃亮秀髮'},{icon:'🎨',text:'護色亮澤更持久'},{icon:'🌿',text:'山茶花側柏精華'}]},
+    // 其他保養系列
+    {id:50,cat:'skin',name:'高效修護精華組安瓶 10ml×4瓶',emoji:'💊',image:'',price:1800,origPrice:0,badge:'精選',shortDesc:'高濃度精華安瓶急救組，密集修護肌膚，快速提升肌膚狀態',tags:['精華安瓶','密集修護','高濃度精華','快速提升'],intro:'高效修護精華組安瓶每瓶10ml封存高濃度修護精華，四瓶一組進行密集療程，快速修護受損疲憊肌膚，適合旅行前或重要場合前集中修護。',ingredients:'漢方草本濃縮精華（人參、當歸、靈芝、玉竹）、透明質酸鈉、維生素E、水解膠原蛋白、Aqua',howToUse:'潔膚後開啟一瓶安瓶，取全部精華液均勻塗抹全臉，輕柔按摩至完全吸收，連續使用4天完成密集療程。',cautions:'・開封後請一次性用完\n・置於陰涼避光處',highlights:[{icon:'💊',text:'高濃度精華安瓶'},{icon:'⚡',text:'快速密集修護肌膚'},{icon:'🌿',text:'漢方草本濃縮精華'},{icon:'✨',text:'重要場合前急救'}]},
+    {id:51,cat:'skin',name:'尊愛風華調理按摩霜 100ml',emoji:'💆',image:'',price:2000,origPrice:0,badge:'',shortDesc:'草本調理按摩霜，促進肌膚循環，搭配穴位按摩提升保養吸收',tags:['按摩霜','調理循環','穴位按摩','提升吸收'],intro:'尊愛風華調理按摩霜以草本循環促進配方，質地滑順易於按摩，搭配臉部穴位按摩手法促進微循環，提升後續保養品吸收效率，特別適合搭配美妍館經絡撥筋服務使用。',ingredients:'草本萃取液（川芎、當歸、丹參、黃芪）、Glycerine、Cetyl Alcohol、Mineral Oil、Aqua',howToUse:'潔膚後取適量於指尖，輕柔按壓臉部穴位，以畫圈方式按摩全臉3-5分鐘，之後接續精華液及乳霜。',cautions:'・按摩力道適中，避免過度拉扯\n・避免直接接觸眼睛',highlights:[{icon:'💆',text:'草本調理按摩配方'},{icon:'🔄',text:'促進肌膚微循環'},{icon:'📈',text:'提升保養吸收效率'},{icon:'🌿',text:'川芎當歸漢方精華'}]},
+    // 保濕系列
+    {id:53,cat:'skin',name:'尊愛風華 玫瑰美露 150ml',emoji:'🌹',image:'',price:990,origPrice:0,badge:'',shortDesc:'玫瑰花露×草本滲透配方，肌膚快速吸收，細嫩光滑柔嫩，適合各年齡層',tags:['玫瑰花露','草本滲透','保濕補水','全膚質適用'],intro:'以天然玫瑰花露為基底，結合絲瓜露與多種草本萃取液（玉竹、天冬、菊花、白茅、白芷、地衣、白楊柳），卓越的滲透力讓肌膚快速吸收，使用後觸感細嫩、光滑柔嫩，適用各種年齡層與膚質。',ingredients:'玫瑰花露、絲瓜露、草本萃取液（玉竹、天冬、菊花、白茅、白芷、地衣、白楊柳）',howToUse:'潔膚後取適量輕拍全臉，待吸收後再塗抹後續保養品，早晚均可使用。',cautions:'・避免直接接觸眼睛\n・置於陰涼乾燥處\n・開封後請於6個月內使用',highlights:[{icon:'🌹',text:'天然玫瑰花露基底'},{icon:'💧',text:'卓越滲透快速吸收'},{icon:'✨',text:'細嫩光滑柔嫩肌'},{icon:'🌿',text:'多種草本萃取複方'}]},
+    {id:54,cat:'skin',name:'精采顏值美膚液 175ml',emoji:'💎',image:'',price:1500,origPrice:0,badge:'',shortDesc:'草本滲透高效保濕液，提升肌膚吸收力，淨化毛孔，由內而外散發自然光澤',tags:['草本高滲透','保濕活化','淨化毛孔','自然光澤'],intro:'以草本多重萃取液為核心（山藥、紫蘇、香燕、番茄、小黃瓜、冬瓜、敏豆、香水蓮花、洛神花、桔皮、蘋果、玉竹、菊花、麥冬、益母草），卓越的滲透力保濕、水嫩、活化肌膚，提升吸收力，淨化毛孔，由內而外散發自然光澤。',ingredients:'草本萃取液（山藥、紫蘇、香燕、番茄、小黃瓜、冬瓜、敏豆、香水蓮花、洛神花、桔皮、蘋果、玉竹、菊花、麥冬、益母草）',howToUse:'潔膚後取適量輕拍全臉，待吸收後使用精華液及乳霜，早晚均可使用。',cautions:'・避免直接接觸眼睛\n・置於陰涼乾燥處\n・開封後6個月內使用完畢',highlights:[{icon:'💎',text:'草本多重萃取配方'},{icon:'⬆️',text:'提升保養品吸收力'},{icon:'🌟',text:'淨化毛孔自然光澤'},{icon:'💧',text:'深層保濕活化肌膚'}]},
+    {id:55,cat:'skin',name:'精采顏值美膚液 補充瓶 350ml',emoji:'💎',image:'',price:2700,origPrice:0,badge:'超值補充',shortDesc:'精采顏值美膚液超值補充瓶，同樣草本配方更大容量，日常保濕更經濟實惠',tags:['補充瓶','超值容量','草本高滲透','經濟實惠'],intro:'補充瓶（350ml）採用與正裝相同的草本多重萃取液配方，超值大容量讓日常保濕更經濟實惠，同樣卓越的滲透力保濕、活化肌膚，由內而外散發自然光澤。',ingredients:'草本萃取液（山藥、紫蘇、香燕、番茄、小黃瓜、冬瓜、敏豆、香水蓮花、洛神花、桔皮、蘋果、玉竹、菊花、麥冬、益母草）',howToUse:'潔膚後取適量輕拍全臉，待吸收後接續後續保養步驟，早晚均可使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'💰',text:'超值大容量補充瓶'},{icon:'💎',text:'與正裝相同配方'},{icon:'💧',text:'深層保濕活化肌膚'},{icon:'🌿',text:'草本多重萃取精華'}]},
+    {id:56,cat:'skin',name:'美麗人生靚白 美膚液 100ml',emoji:'🌸',image:'',price:4500,origPrice:0,badge:'',shortDesc:'草本精華深入肌膚皮層，補水潤澤維持潤澤平衡，光澤富彈性透亮潤澤',tags:['草本美白','深層補水','彈性光澤','透亮潤澤'],intro:'以草本配方精華深入肌膚皮層，補水潤澤，使肌膚保持活力和彈性，維持肌膚的潤澤平衡。成分含草本萃取（小黃瓜、山藥、香水蓮花、蘆薈、白藤菊、綠豆、菊花、蒲公英、麥冬、石斛）、白木耳、海藻醣、地衣、多元醇，肌膚光澤富有彈性，賦活肌膚，潔淨更顯透亮潤澤。',ingredients:'草本萃取（小黃瓜、山藥、香水蓮花、蘆薈、白藤菊、綠豆、菊花、蒲公英、麥冬、石斛）、白木耳、海藻醣、地衣、多元醇',howToUse:'潔膚後取適量均勻輕拍全臉，待完全吸收後再進行後續保養，早晚各一次。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處\n・開封後6個月內使用完畢',highlights:[{icon:'🌸',text:'草本深層補水精華'},{icon:'✨',text:'光澤彈性透亮肌膚'},{icon:'🌿',text:'白木耳海藻醣滋潤'},{icon:'💧',text:'維持肌膚潤澤平衡'}]},
+    {id:52,cat:'skin',name:'明眸唇漾防護蜜 50ml',emoji:'👁️',image:'',price:1500,origPrice:0,badge:'',shortDesc:'眼唇專用防護蜜，草本滋潤修護，防禦環境傷害保持嬌嫩水潤',tags:['眼唇防護','草本滋潤','嬌嫩修護','環境防禦'],intro:'明眸唇漾防護蜜專為眼唇嬌嫩部位設計，草本滋潤精華防禦日間環境傷害（UV、乾燥、污染），保持眼周及唇部持續嬌嫩水潤，輕薄服貼不黏膩。',ingredients:'草本萃取液（玫瑰、甘菊、蘆薈、白木耳）、Glycerine、Sodium Hyaluronate、Vitamin E、Aqua',howToUse:'每日早晨保養後取少量輕拍塗抹眼周及唇部，全日可重複補擦，可在上彩妝前作底妝防護。',cautions:'・避免直接入眼\n・若有不適請停用',highlights:[{icon:'👁️',text:'眼唇專用防護配方'},{icon:'🌿',text:'草本滋潤修護精華'},{icon:'🛡️',text:'防禦環境UV傷害'},{icon:'💧',text:'全日嬌嫩水潤'}]},
+  ]
+};
+
+// ══════════════════════════════════════════
+//  STORAGE HELPERS
+// ══════════════════════════════════════════
+function getData(key){ try{ const v=localStorage.getItem('gm_'+key); return v?JSON.parse(v):null; }catch(e){return null;} }
+function setData(key,val){ try{ localStorage.setItem('gm_'+key,JSON.stringify(val)); }catch(e){ alert('儲存空間不足，請清除部分圖片後再試。'); } }
+function initData(){
+  if(!getData('password')) setData('password', DEFAULTS.password);
+  if(!getData('storeSettings')) setData('storeSettings', DEFAULTS.storeSettings);
+  if(!getData('homeSettings')) setData('homeSettings', DEFAULTS.homeSettings);
+  if(!getData('categorySettings')) setData('categorySettings', DEFAULTS.categorySettings);
+  if(!getData('freshSettings')) setData('freshSettings', DEFAULTS.freshSettings);
+
+  // productTabs：有就合併新增的，沒有就用預設
+  const savedTabs = getData('productTabs');
+  if(!savedTabs){
+    setData('productTabs', DEFAULTS.productTabs);
+  } else {
+    const existIds = new Set(savedTabs.map(t=>t.id));
+    const newTabs = DEFAULTS.productTabs.filter(t=>!existIds.has(t.id));
+    if(newTabs.length) setData('productTabs', [...savedTabs, ...newTabs]);
+  }
+
+  // products：有就合併新增的（保留後台上傳的圖片與自訂資料），沒有就用預設
+  const savedProds = getData('products');
+  if(!savedProds){
+    setData('products', DEFAULTS.products);
+  } else {
+    const existIds = new Set(savedProds.map(p=>p.id));
+    const newProds = DEFAULTS.products.filter(p=>!existIds.has(p.id));
+    if(newProds.length) setData('products', [...savedProds, ...newProds]);
+  }
+}
+
+// ══════════════════════════════════════════
+//  LOGIN
+// ══════════════════════════════════════════
+function doLogin(){
+  initData();
+  const pwd = document.getElementById('pwdInput').value;
+  const stored = getData('password') || DEFAULTS.password;
+  if(pwd === stored){
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='block';
+    loadAllFields();
+  } else {
+    document.getElementById('loginErr').style.display='block';
+    document.getElementById('pwdInput').value='';
+    document.getElementById('pwdInput').focus();
+  }
+}
+function doLogout(){
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('adminApp').style.display='none';
+  document.getElementById('pwdInput').value='';
+  document.getElementById('loginErr').style.display='none';
+}
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+const sectionTitles = {
+  'home-settings':'首頁設定',
+  'products-mgr':'商品管理',
+  'tab-mgr':'分類標籤管理',
+  'category-mgr':'系列介紹',
+  'fresh-settings':'生鮮訂購設定',
+  'store-settings':'店鋪資料',
+  'security':'安全設定'
+};
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s=>s.style.display='none');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sec-'+id).style.display='block';
+  event.currentTarget.classList.add('active');
+  document.getElementById('topbarTitle').textContent = sectionTitles[id];
+  if(id==='products-mgr'){ currentFilter='all'; renderProductListTabs(); renderProductList('all'); }
+  if(id==='tab-mgr') renderTabList();
+}
+
+// ══════════════════════════════════════════
+//  LOAD ALL FIELDS
+// ══════════════════════════════════════════
+function loadAllFields(){
+  loadHomeSettings();
+  loadStoreSettings();
+  loadCategorySettings();
+  loadFreshSettings();
+  populateCatSelect();
+}
+
+// ══════════════════════════════════════════
+//  TAB / CATEGORY MANAGEMENT
+// ══════════════════════════════════════════
+function getTabs(){ return getData('productTabs') || DEFAULTS.productTabs; }
+function saveTabs(tabs){ setData('productTabs', tabs); }
+
+function renderTabList(){
+  const tabs = getTabs();
+  const container = document.getElementById('tabList');
+  if(!tabs.length){ container.innerHTML='<p style="color:var(--text-light);font-size:.85rem">尚無分類，請新增。</p>'; return; }
+  container.innerHTML = tabs.map((t,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px">
+      <span style="font-size:.8rem;color:var(--text-light);min-width:70px">ID: ${t.id}</span>
+      <input type="text" value="${t.label}" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:.9rem"
+        onchange="updateTabLabel(${i}, this.value)" />
+      <button class="btn btn-danger" style="padding:6px 12px;font-size:.8rem" onclick="deleteTab(${i})">刪除</button>
+    </div>
+  `).join('');
+}
+
+function addTab(){
+  const idEl = document.getElementById('new-tab-id');
+  const labelEl = document.getElementById('new-tab-label');
+  const id = idEl.value.trim().replace(/\s+/g,'');
+  const label = labelEl.value.trim();
+  if(!id || !label){ alert('請填寫分類 ID 與名稱'); return; }
+  const tabs = getTabs();
+  if(tabs.find(t=>t.id===id)){ alert('該 ID 已存在，請使用不同的 ID'); return; }
+  tabs.push({id, label});
+  saveTabs(tabs);
+  idEl.value=''; labelEl.value='';
+  renderTabList();
+  renderProductListTabs();
+  populateCatSelect();
+  showSaveToast();
+}
+
+function deleteTab(index){
+  const tabs = getTabs();
+  if(tabs.length<=1){ alert('至少需保留一個分類'); return; }
+  if(!confirm(`確定要刪除分類「${tabs[index].label}」嗎？`)) return;
+  tabs.splice(index,1);
+  saveTabs(tabs);
+  renderTabList();
+  renderProductListTabs();
+  populateCatSelect();
+  showSaveToast();
+}
+
+function updateTabLabel(index, newLabel){
+  if(!newLabel.trim()){ alert('分類名稱不可為空'); return; }
+  const tabs = getTabs();
+  tabs[index].label = newLabel.trim();
+  saveTabs(tabs);
+  renderProductListTabs();
+  populateCatSelect();
+  showSaveToast();
+}
+
+function populateCatSelect(){
+  const sel = document.getElementById('p-cat');
+  if(!sel) return;
+  const tabs = getTabs();
+  const current = sel.value;
+  sel.innerHTML = tabs.map(t=>`<option value="${t.id}"${t.id===current?' selected':''}>${t.label}</option>`).join('');
+}
+
+// ── Home Settings ──
+function loadHomeSettings(){
+  const d = getData('homeSettings') || DEFAULTS.homeSettings;
+  document.getElementById('hs-badge').value = d.badge||'';
+  document.getElementById('hs-title1').value = d.title1||'';
+  document.getElementById('hs-title2').value = d.title2||'';
+  document.getElementById('hs-desc').value = d.desc||'';
+  document.getElementById('hs-btn1').value = d.btn1||'';
+  document.getElementById('hs-btn2').value = d.btn2||'';
+  if(d.logoImage){ logoImageB64=d.logoImage; document.getElementById('logoPreview').src=d.logoImage; document.getElementById('logoPreview').style.display='block'; document.getElementById('logoPlaceholder').style.display='none'; }
+  else { logoImageB64=''; document.getElementById('logoPreview').style.display='none'; document.getElementById('logoPlaceholder').style.display='block'; }
+  if(d.heroBgImage){ heroBgImageB64=d.heroBgImage; document.getElementById('heroBgPreview').src=d.heroBgImage; document.getElementById('heroBgPreview').style.display='block'; document.getElementById('heroBgPlaceholder').style.display='none'; }
+  else { heroBgImageB64=''; document.getElementById('heroBgPreview').style.display='none'; document.getElementById('heroBgPlaceholder').style.display='block'; }
+  renderTrustList(d.trust||[]);
+  renderFeaturesEditor(d.features||[]);
+}
+function saveHomeSettings(){
+  const trust = [...document.querySelectorAll('.trust-item-input')].map(i=>i.value).filter(v=>v.trim());
+  const features = [...document.querySelectorAll('.feat-item')].map(fi=>({
+    icon: fi.querySelector('.feat-icon-emoji').value,
+    iconImage: fi.querySelector('.feat-icon-img-data').value,
+    title: fi.querySelector('.feat-title').value,
+    desc: fi.querySelector('.feat-desc').value
+  }));
+  setData('homeSettings',{
+    badge:document.getElementById('hs-badge').value,
+    title1:document.getElementById('hs-title1').value,
+    title2:document.getElementById('hs-title2').value,
+    desc:document.getElementById('hs-desc').value,
+    btn1:document.getElementById('hs-btn1').value,
+    btn2:document.getElementById('hs-btn2').value,
+    logoImage: logoImageB64,
+    heroBgImage: heroBgImageB64,
+    trust, features
+  });
+  showSaveToast();
+}
+function renderTrustList(items){
+  document.getElementById('trustList').innerHTML = items.map((t,i)=>`
+    <div class="trust-item-row">
+      <input class="trust-item-input" type="text" value="${escHtml(t)}" placeholder="✅ 天然有機成分" style="flex:1;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" />
+      <button class="del-trust" onclick="this.parentElement.remove()">🗑️</button>
+    </div>`).join('');
+}
+function addTrustItem(){
+  const list = document.getElementById('trustList');
+  const div = document.createElement('div');
+  div.className='trust-item-row';
+  div.innerHTML=`<input class="trust-item-input" type="text" placeholder="✅ 標語文字" style="flex:1;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /><button class="del-trust" onclick="this.parentElement.remove()">🗑️</button>`;
+  list.appendChild(div);
+  div.querySelector('input').focus();
+}
+function renderFeaturesEditor(features){
+  document.getElementById('features-editor').innerHTML = features.map((f,i)=>`
+    <div class="feat-item" style="background:#fafafa;border:1.5px solid #e8f0e9;border-radius:10px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px">
+        <div>
+          <div class="feat-img-btn" onclick="document.getElementById('feat-file-${i}').click()" id="feat-img-btn-${i}">
+            <input id="feat-file-${i}" type="file" accept="image/*" style="display:none" onchange="handleFeatImgUpload(this,${i})" />
+            ${f.iconImage ? `<img src="${escHtml(f.iconImage)}" id="feat-img-${i}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />` : `<img id="feat-img-${i}" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />`}
+            <span class="fi-ph" id="feat-ph-${i}" style="${f.iconImage?'display:none':''}">📷</span>
+            <small style="${f.iconImage?'display:none':''}">上傳圖片</small>
+          </div>
+          <input type="hidden" class="feat-icon-img-data" id="feat-icon-img-${i}" value="${escHtml(f.iconImage||'')}" />
+          <input type="hidden" class="feat-icon-emoji" value="${escHtml(f.icon||'')}" />
+          <button class="btn btn-sm btn-danger" style="margin-top:4px;width:80px;font-size:.68rem;padding:3px 0" onclick="clearFeatImg(${i})">清除</button>
+        </div>
+        <div style="flex:1"><div class="fg" style="margin-bottom:0"><label>標題</label><input class="feat-title" type="text" value="${escHtml(f.title)}" /></div></div>
+      </div>
+      <div class="fg"><label>說明文字</label><textarea class="feat-desc" style="min-height:65px">${escHtml(f.desc)}</textarea></div>
+    </div>`).join('');
+}
+
+// ── Store Settings ──
+function loadStoreSettings(){
+  const d = getData('storeSettings') || DEFAULTS.storeSettings;
+  document.getElementById('ss-name').value = d.name||'';
+  document.getElementById('ss-sub').value = d.sub||'';
+  document.getElementById('ss-footer-desc').value = d.footerDesc||'';
+  document.getElementById('ss-line').value = d.line||'';
+  document.getElementById('ss-phone').value = d.phone||'';
+  document.getElementById('ss-email').value = d.email||'';
+}
+function saveStoreSettings(){
+  setData('storeSettings',{
+    name:document.getElementById('ss-name').value,
+    sub:document.getElementById('ss-sub').value,
+    footerDesc:document.getElementById('ss-footer-desc').value,
+    line:document.getElementById('ss-line').value,
+    phone:document.getElementById('ss-phone').value,
+    email:document.getElementById('ss-email').value
+  });
+  showSaveToast();
+}
+
+// ── Category Settings ──
+function loadCategorySettings(){
+  const d = getData('categorySettings') || DEFAULTS.categorySettings;
+  document.getElementById('cat1-tag').value = d.cat1.tag||'';
+  document.getElementById('cat1-name').value = d.cat1.name||'';
+  document.getElementById('cat1-desc').value = d.cat1.desc||'';
+  if(d.cat1.bgImage){ cat1BgImageB64=d.cat1.bgImage; document.getElementById('cat1BgPreview').src=d.cat1.bgImage; document.getElementById('cat1BgPreview').style.display='block'; document.getElementById('cat1BgPlaceholder').style.display='none'; }
+  else { cat1BgImageB64=''; document.getElementById('cat1BgPreview').style.display='none'; document.getElementById('cat1BgPlaceholder').style.display='block'; }
+  document.getElementById('cat2-tag').value = d.cat2.tag||'';
+  document.getElementById('cat2-name').value = d.cat2.name||'';
+  document.getElementById('cat2-desc').value = d.cat2.desc||'';
+  if(d.cat2.bgImage){ cat2BgImageB64=d.cat2.bgImage; document.getElementById('cat2BgPreview').src=d.cat2.bgImage; document.getElementById('cat2BgPreview').style.display='block'; document.getElementById('cat2BgPlaceholder').style.display='none'; }
+  else { cat2BgImageB64=''; document.getElementById('cat2BgPreview').style.display='none'; document.getElementById('cat2BgPlaceholder').style.display='block'; }
+}
+function saveCategorySettings(){
+  setData('categorySettings',{
+    cat1:{tag:document.getElementById('cat1-tag').value,name:document.getElementById('cat1-name').value,desc:document.getElementById('cat1-desc').value,bgImage:cat1BgImageB64},
+    cat2:{tag:document.getElementById('cat2-tag').value,name:document.getElementById('cat2-name').value,desc:document.getElementById('cat2-desc').value,bgImage:cat2BgImageB64}
+  });
+  showSaveToast();
+}
+
+// ══════════════════════════════════════════
+//  PRODUCTS
+// ══════════════════════════════════════════
+let editingProductId = null;
+let uploadedImageB64 = '';
+let logoImageB64 = '';
+let heroBgImageB64 = '';
+let cat1BgImageB64 = '';
+let cat2BgImageB64 = '';
+let freshBgImageB64 = '';
+let currentFilter = 'all';
+
+function getProducts(){ return getData('products') || DEFAULTS.products; }
+function saveProducts(list){ setData('products', list); }
+
+function renderProductListTabs(){
+  const tabs = getTabs();
+  const bar = document.getElementById('productListTabBar');
+  if(!bar) return;
+  const currentCat = currentFilter || 'all';
+  bar.innerHTML = `<div class="tab-item${currentCat==='all'?' active':''}" onclick="filterProductList('all',this)">全部商品</div>`
+    + tabs.map(t=>`<div class="tab-item${currentCat===t.id?' active':''}" onclick="filterProductList('${t.id}',this)">${escHtml(t.label)}</div>`).join('');
+}
+
+function getCatLabelAdmin(cat){
+  const tabs = getTabs();
+  const found = tabs.find(t=>t.id===cat);
+  return found ? found.label : cat;
+}
+
+function filterProductList(cat, btn){
+  currentFilter = cat;
+  document.querySelectorAll('#productListTabBar .tab-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProductList(cat);
+}
+
+function renderProductList(filter){
+  const all = getProducts();
+  const list = filter==='all' ? all : all.filter(p=>p.cat===filter);
+  document.getElementById('productList').innerHTML = list.length===0
+    ? '<p style="color:var(--text-light);text-align:center;padding:24px">此分類尚無商品</p>'
+    : list.map(p=>`
+      <div class="product-row">
+        <div class="product-row-img">${p.image?`<img src="${p.image}" alt="${escHtml(p.name)}">`:p.emoji}</div>
+        <div class="product-row-info">
+          <div class="product-row-name">${escHtml(p.name)} ${p.badge?`<span class="badge badge-green">${p.badge}</span>`:''}</div>
+          <div class="product-row-meta">${escHtml(getCatLabelAdmin(p.cat))} · ${escHtml(p.shortDesc).substring(0,30)}...</div>
+        </div>
+        <div class="product-row-price">NT$ ${p.price.toLocaleString()}</div>
+        <div class="product-row-actions">
+          <button class="btn btn-outline btn-sm" onclick="openProductModal(${p.id})">✏️ 編輯</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct(${p.id})">🗑️</button>
+        </div>
+      </div>`).join('');
+}
+
+function openProductModal(id){
+  editingProductId = id;
+  uploadedImageB64 = '';
+  const modal = document.getElementById('productModal');
+  modal.classList.remove('hidden');
+  document.getElementById('imgPreview').style.display='none';
+  document.getElementById('imgPlaceholder').style.display='block';
+
+  if(id===null){
+    document.getElementById('modalTitle').textContent='新增商品';
+    clearForm();
+  } else {
+    document.getElementById('modalTitle').textContent='編輯商品';
+    const p = getProducts().find(x=>x.id===id);
+    if(!p) return;
+    document.getElementById('p-cat').value = p.cat||'life';
+    document.getElementById('p-badge').value = p.badge||'';
+    document.getElementById('p-name').value = p.name||'';
+    document.getElementById('p-emoji').value = p.emoji||'';
+    document.getElementById('p-price').value = p.price||'';
+    document.getElementById('p-orig-price').value = p.origPrice||'';
+    document.getElementById('p-short').value = p.shortDesc||'';
+    document.getElementById('p-tags').value = (p.tags||[]).join(', ');
+    document.getElementById('p-intro').value = p.intro||'';
+    document.getElementById('p-ingredients').value = p.ingredients||'';
+    document.getElementById('p-howto').value = p.howToUse||'';
+    document.getElementById('p-cautions').value = p.cautions||'';
+    if(p.image){ uploadedImageB64=p.image; document.getElementById('imgPreview').src=p.image; document.getElementById('imgPreview').style.display='block'; document.getElementById('imgPlaceholder').style.display='none'; }
+    const hls = p.highlights||[{icon:'',text:''},{icon:'',text:''},{icon:'',text:''},{icon:'',text:''}];
+    document.querySelectorAll('.hl-icon').forEach((el,i)=>el.value=hls[i]?hls[i].icon:'');
+    document.querySelectorAll('.hl-text').forEach((el,i)=>el.value=hls[i]?hls[i].text:'');
+    // load highlight images
+    for(let i=0;i<4;i++){
+      const iconImg = hls[i]?hls[i].iconImage||'':'';
+      document.getElementById('hl-icon-img-'+i).value = iconImg;
+      const imgEl = document.getElementById('hl-img-'+i);
+      const phEl = document.getElementById('hl-ph-'+i);
+      if(iconImg){ imgEl.src=iconImg; imgEl.style.display='block'; phEl.style.display='none'; }
+      else { imgEl.style.display='none'; phEl.style.display=''; }
+    }
+  }
+  document.querySelector('.modal-body').scrollTop=0;
+}
+
+function clearForm(){
+  ['p-name','p-emoji','p-price','p-orig-price','p-short','p-tags','p-intro','p-ingredients','p-howto','p-cautions'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('p-cat').value='life';
+  document.getElementById('p-badge').value='';
+  document.querySelectorAll('.hl-icon,.hl-text').forEach(el=>el.value='');
+  for(let i=0;i<4;i++){
+    document.getElementById('hl-icon-img-'+i).value='';
+    const imgEl=document.getElementById('hl-img-'+i);
+    const phEl=document.getElementById('hl-ph-'+i);
+    imgEl.style.display='none';
+    phEl.style.display='';
+  }
+}
+
+function closeProductModal(){ document.getElementById('productModal').classList.add('hidden'); }
+
+function saveProduct(){
+  const name = document.getElementById('p-name').value.trim();
+  const price = parseInt(document.getElementById('p-price').value);
+  if(!name){ alert('請填入商品名稱'); return; }
+  if(!price||price<=0){ alert('請填入正確的售價'); return; }
+
+  const highlights = [];
+  const icons = document.querySelectorAll('.hl-icon');
+  const iconImgs = document.querySelectorAll('.hl-icon-img');
+  const texts = document.querySelectorAll('.hl-text');
+  icons.forEach((el,i)=>{ if(el.value||texts[i].value||iconImgs[i].value) highlights.push({icon:el.value,iconImage:iconImgs[i].value,text:texts[i].value}); });
+
+  const product = {
+    id: editingProductId!==null ? editingProductId : Date.now(),
+    cat: document.getElementById('p-cat').value,
+    catLabel: document.getElementById('p-cat').value==='life' ? '有機生活用品 · 律活綠活' : '天然漢方草本護膚品 · 神采彤妍',
+    name,
+    emoji: document.getElementById('p-emoji').value || '📦',
+    image: uploadedImageB64,
+    price,
+    origPrice: parseInt(document.getElementById('p-orig-price').value)||0,
+    badge: document.getElementById('p-badge').value,
+    shortDesc: document.getElementById('p-short').value,
+    tags: document.getElementById('p-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    intro: document.getElementById('p-intro').value,
+    ingredients: document.getElementById('p-ingredients').value,
+    howToUse: document.getElementById('p-howto').value,
+    cautions: document.getElementById('p-cautions').value,
+    highlights
+  };
+
+  let list = getProducts();
+  if(editingProductId!==null){ list = list.map(p=>p.id===editingProductId?product:p); }
+  else { list.push(product); }
+  saveProducts(list);
+  closeProductModal();
+  renderProductList(currentFilter);
+  showSaveToast();
+}
+
+function deleteProduct(id){
+  const p = getProducts().find(x=>x.id===id);
+  if(!confirm(`確定要刪除「${p.name}」嗎？此動作無法還原。`)) return;
+  saveProducts(getProducts().filter(x=>x.id!==id));
+  renderProductList(currentFilter);
+  showSaveToast('🗑️ 已刪除');
+}
+
+// ── 圖片壓縮核心（Canvas 縮放 + JPEG 品質壓縮，大幅減少 localStorage 佔用）──
+function compressImage(file, maxW, maxH, quality) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(maxW / img.width, maxH / img.height, 1);
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Image upload ──
+async function handleImageUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const b64 = await compressImage(file, 600, 600, 0.75);
+  uploadedImageB64 = b64;
+  document.getElementById('imgPreview').src = b64;
+  document.getElementById('imgPreview').style.display = 'block';
+  document.getElementById('imgPlaceholder').style.display = 'none';
+}
+function clearImage(){
+  uploadedImageB64='';
+  document.getElementById('imgPreview').style.display='none';
+  document.getElementById('imgPlaceholder').style.display='block';
+}
+async function handleLogoUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const b64 = await compressImage(file, 300, 300, 0.85);
+  logoImageB64 = b64;
+  document.getElementById('logoPreview').src = b64;
+  document.getElementById('logoPreview').style.display = 'block';
+  document.getElementById('logoPlaceholder').style.display = 'none';
+}
+function clearLogoImage(){logoImageB64='';document.getElementById('logoPreview').style.display='none';document.getElementById('logoPlaceholder').style.display='block';}
+async function handleHeroBgUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const b64 = await compressImage(file, 1200, 600, 0.65);
+  heroBgImageB64 = b64;
+  document.getElementById('heroBgPreview').src = b64;
+  document.getElementById('heroBgPreview').style.display = 'block';
+  document.getElementById('heroBgPlaceholder').style.display = 'none';
+}
+function clearHeroBgImage(){heroBgImageB64='';document.getElementById('heroBgPreview').style.display='none';document.getElementById('heroBgPlaceholder').style.display='block';}
+async function handleCat1BgUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const b64 = await compressImage(file, 800, 500, 0.70);
+  cat1BgImageB64 = b64;
+  document.getElementById('cat1BgPreview').src = b64;
+  document.getElementById('cat1BgPreview').style.display = 'block';
+  document.getElementById('cat1BgPlaceholder').style.display = 'none';
+}
+function clearCat1BgImage(){cat1BgImageB64='';document.getElementById('cat1BgPreview').style.display='none';document.getElementById('cat1BgPlaceholder').style.display='block';}
+async function handleCat2BgUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const b64 = await compressImage(file, 800, 500, 0.70);
+  cat2BgImageB64 = b64;
+  document.getElementById('cat2BgPreview').src = b64;
+  document.getElementById('cat2BgPreview').style.display = 'block';
+  document.getElementById('cat2BgPlaceholder').style.display = 'none';
+}
+function clearCat2BgImage(){cat2BgImageB64='';document.getElementById('cat2BgPreview').style.display='none';document.getElementById('cat2BgPlaceholder').style.display='block';}
+
+// ── Fresh banner image ──
+async function handleFreshBgUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const b64 = await compressImage(file, 1200, 500, 0.65);
+  freshBgImageB64 = b64;
+  document.getElementById('freshBgPreview').src = b64;
+  document.getElementById('freshBgPreview').style.display = 'block';
+  document.getElementById('freshBgPlaceholder').style.display = 'none';
+}
+function clearFreshBgImage(){freshBgImageB64='';document.getElementById('freshBgPreview').style.display='none';document.getElementById('freshBgPlaceholder').style.display='block';}
+
+// ── Feature icon image ──
+async function handleFeatImgUpload(input, idx) {
+  const file = input.files[0]; if (!file) return;
+  const b64 = await compressImage(file, 200, 200, 0.80);
+  document.getElementById('feat-icon-img-'+idx).value = b64;
+  const img = document.getElementById('feat-img-'+idx);
+  img.src = b64; img.style.display = 'block';
+  document.getElementById('feat-ph-'+idx).style.display = 'none';
+}
+function clearFeatImg(idx){
+  document.getElementById('feat-icon-img-'+idx).value='';
+  const img=document.getElementById('feat-img-'+idx);
+  img.src=''; img.style.display='none';
+  document.getElementById('feat-ph-'+idx).style.display='';
+}
+
+// ── Highlight icon image ──
+async function handleHlImgUpload(input, idx) {
+  const file = input.files[0]; if (!file) return;
+  const b64 = await compressImage(file, 200, 200, 0.80);
+  document.getElementById('hl-icon-img-'+idx).value = b64;
+  const img = document.getElementById('hl-img-'+idx);
+  img.src = b64; img.style.display = 'block';
+  document.getElementById('hl-ph-'+idx).style.display = 'none';
+}
+
+// ── Fresh Settings ──
+function loadFreshSettings(){
+  const d = getData('freshSettings') || DEFAULTS.freshSettings;
+  if(d.bgImage){ freshBgImageB64=d.bgImage; document.getElementById('freshBgPreview').src=d.bgImage; document.getElementById('freshBgPreview').style.display='block'; document.getElementById('freshBgPlaceholder').style.display='none'; }
+  else { freshBgImageB64=''; document.getElementById('freshBgPreview').style.display='none'; document.getElementById('freshBgPlaceholder').style.display='block'; }
+  document.getElementById('fs-label').value = d.label||'';
+  document.getElementById('fs-title1').value = d.title1||'';
+  document.getElementById('fs-title2').value = d.title2||'';
+  document.getElementById('fs-desc').value = d.desc||'';
+  document.getElementById('fs-btn').value = d.btnText||'';
+  document.getElementById('fs-url').value = d.url||'';
+  renderFreshFeatureList(d.features||[]);
+}
+function saveFreshSettings(){
+  const features = [...document.querySelectorAll('.fresh-feat-input')].map(i=>i.value).filter(v=>v.trim());
+  setData('freshSettings',{
+    bgImage: freshBgImageB64,
+    label: document.getElementById('fs-label').value,
+    title1: document.getElementById('fs-title1').value,
+    title2: document.getElementById('fs-title2').value,
+    desc: document.getElementById('fs-desc').value,
+    btnText: document.getElementById('fs-btn').value,
+    url: document.getElementById('fs-url').value,
+    features
+  });
+  showSaveToast();
+}
+function renderFreshFeatureList(items){
+  document.getElementById('freshFeatureList').innerHTML = items.map((t,i)=>`
+    <div class="trust-item-row" style="margin-bottom:8px">
+      <input class="fresh-feat-input" type="text" value="${escHtml(t)}" placeholder="🌾 服務特點說明" style="flex:1;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" />
+      <button onclick="this.parentElement.remove()" style="color:var(--danger);font-size:1.1rem;padding:4px 8px;background:none;border:none;cursor:pointer">🗑️</button>
+    </div>`).join('')+`<button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="addFreshFeatureItem()">+ 新增特點</button>`;
+}
+function addFreshFeatureItem(){
+  const list=document.getElementById('freshFeatureList');
+  const btn=list.querySelector('button.btn-outline');
+  const div=document.createElement('div');
+  div.className='trust-item-row';
+  div.style.marginBottom='8px';
+  div.innerHTML=`<input class="fresh-feat-input" type="text" placeholder="🌾 服務特點說明" style="flex:1;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /><button onclick="this.parentElement.remove()" style="color:var(--danger);font-size:1.1rem;padding:4px 8px;background:none;border:none;cursor:pointer">🗑️</button>`;
+  list.insertBefore(div,btn);
+  div.querySelector('input').focus();
+}
+
+// ══════════════════════════════════════════
+//  PASSWORD
+// ══════════════════════════════════════════
+function changePassword(){
+  const cur = document.getElementById('pwd-current').value;
+  const nw = document.getElementById('pwd-new').value;
+  const con = document.getElementById('pwd-confirm').value;
+  const msg = document.getElementById('pwd-msg');
+  msg.style.display='block';
+  if(cur !== (getData('password')||DEFAULTS.password)){ msg.style.color='var(--danger)'; msg.textContent='❌ 目前密碼錯誤'; return; }
+  if(nw.length < 6){ msg.style.color='var(--danger)'; msg.textContent='❌ 新密碼至少需要6個字元'; return; }
+  if(nw !== con){ msg.style.color='var(--danger)'; msg.textContent='❌ 兩次輸入的密碼不一致'; return; }
+  setData('password', nw);
+  msg.style.color='var(--green)'; msg.textContent='✅ 密碼已成功更新！';
+  document.getElementById('pwd-current').value='';
+  document.getElementById('pwd-new').value='';
+  document.getElementById('pwd-confirm').value='';
+}
+
+function resetAll(){
+  if(!confirm('確定要重置所有設定嗎？所有商品資料與設定都將恢復預設值，此動作無法還原。')) return;
+  ['password','storeSettings','homeSettings','categorySettings','productTabs','products','freshSettings'].forEach(k=>localStorage.removeItem('gm_'+k));
+  initData();
+  loadAllFields();
+  renderProductList('all');
+  alert('已重置完成！');
+}
+
+// ══════════════════════════════════════════
+//  UTILS
+// ══════════════════════════════════════════
+function showSaveToast(msg){
+  const t=document.getElementById('saveToast');
+  t.textContent = msg||'✅ 已儲存！網站已同步更新。';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+function escHtml(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Close modal on background click
+document.getElementById('productModal').addEventListener('click', e => {
+  if(e.target===document.getElementById('productModal')) closeProductModal();
+});
+</script>
+</body>
+</html>
