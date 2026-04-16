@@ -6,6 +6,9 @@
   <!-- ✏️ 修改網站標題 -->
   <title>光明健康生活園地 — 有機·天然·純淨</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -1369,8 +1372,7 @@ const DEFAULT_TABS = [
 ];
 
 function getProductTabs() {
-  try { const v = localStorage.getItem('gm_productTabs'); if(v) return JSON.parse(v); } catch(e){}
-  return DEFAULT_TABS;
+  return getData('productTabs') || DEFAULT_TABS;
 }
 
 function getCatLabel(cat) {
@@ -1585,9 +1587,21 @@ function openMobileNav() { document.getElementById('mobileNav').classList.add('o
 function closeMobileNav() { document.getElementById('mobileNav').classList.remove('open'); document.body.style.overflow = ''; }
 
 // ══════════════════════════════════════════════
-//  讀取後台設定，套用到網站
+//  Firebase 設定 + 資料讀取
 // ══════════════════════════════════════════════
-function getData(key){ try{ const v=localStorage.getItem('gm_'+key); return v?JSON.parse(v):null; }catch(e){return null;} }
+const _firebaseConfig = {
+  apiKey: "AIzaSyChGeC6WfCZsc0aTUPCTc3O8bsH27lnKF0",
+  authDomain: "guangming-store.firebaseapp.com",
+  projectId: "guangming-store",
+  storageBucket: "guangming-store.firebasestorage.app",
+  messagingSenderId: "1047992665445",
+  appId: "1:1047992665445:web:f30402e1f6d835c8adcd8c"
+};
+firebase.initializeApp(_firebaseConfig);
+const _db = firebase.firestore();
+
+let _cache = {};
+function getData(key){ return (_cache[key] !== undefined) ? _cache[key] : null; }
 
 // 完整 URL → 直接使用；官方帳號 @xxx → line.me；個人帳號 → line.me/ti/p/~xxx
 function buildLineUrl(id) {
@@ -1598,13 +1612,6 @@ function buildLineUrl(id) {
 }
 
 function applyAdminData(){
-  // 讀取商品（後台有設定就用後台的，否則用預設）
-  const savedProducts = getData('products');
-  if(savedProducts && savedProducts.length > 0){
-    products.length = 0;
-    savedProducts.forEach(p => products.push(p));
-  }
-
   // 讀取首頁設定
   const hs = getData('homeSettings');
   if(hs){
@@ -1753,9 +1760,27 @@ function applyAdminData(){
   }
 }
 
-// ── Init ──────────────────────────────────────────
-applyAdminData();
-// 商品區預設顯示佔位提示，點選 category card 後才展開
+// ── Init：從 Firebase 載入所有資料後再渲染 ──────────
+(async () => {
+  try {
+    // 載入設定
+    const settingsSnap = await _db.collection('settings').get();
+    settingsSnap.forEach(doc => { _cache[doc.id] = doc.data().value; });
+
+    // 載入商品
+    const productsSnap = await _db.collection('products').get();
+    if(!productsSnap.empty){
+      products.length = 0;
+      productsSnap.docs.forEach(d => products.push(d.data()));
+    }
+  } catch(e) {
+    console.warn('Firebase 載入失敗，使用預設資料', e);
+  }
+
+  applyAdminData();
+  renderProductTabs();
+  // 商品區預設顯示佔位提示，點選 category card 後才展開
+})();
 </script>
 </body>
 </html>

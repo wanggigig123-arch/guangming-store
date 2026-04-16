@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>後台管理 — 光明健康生活園地</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -240,11 +245,11 @@
   <div class="login-box">
     <div class="login-logo">🌿</div>
     <div class="login-title">光明健康生活園地</div>
-    <div class="login-sub">後台管理系統 — 請輸入密碼登入</div>
-    <input class="login-input" type="password" id="pwdInput" placeholder="輸入管理密碼" onkeydown="if(event.key==='Enter')doLogin()" />
+    <div class="login-sub">後台管理系統</div>
+    <input class="login-input" type="email" id="loginEmail" placeholder="管理員 Email" onkeydown="if(event.key==='Enter')doLogin()" />
+    <input class="login-input" type="password" id="pwdInput" placeholder="密碼" onkeydown="if(event.key==='Enter')doLogin()" style="margin-top:12px" />
     <button class="login-btn" onclick="doLogin()">登入後台</button>
-    <div class="login-err" id="loginErr">❌ 密碼錯誤，請重試</div>
-    <p style="margin-top:20px;font-size:.78rem;color:#aaa">預設密碼：guangming888（可在後台更改）</p>
+    <div class="login-err" id="loginErr" style="display:none">❌ 帳號或密碼錯誤，請重試</div>
   </div>
 </div>
 
@@ -683,61 +688,127 @@ const DEFAULTS = {
 };
 
 // ══════════════════════════════════════════
-//  STORAGE HELPERS
+//  FIREBASE 初始化
 // ══════════════════════════════════════════
-function getData(key){ try{ const v=localStorage.getItem('gm_'+key); return v?JSON.parse(v):null; }catch(e){return null;} }
-function setData(key,val){ try{ localStorage.setItem('gm_'+key,JSON.stringify(val)); }catch(e){ alert('儲存空間不足，請清除部分圖片後再試。'); } }
-function initData(){
-  if(!getData('password')) setData('password', DEFAULTS.password);
-  if(!getData('storeSettings')) setData('storeSettings', DEFAULTS.storeSettings);
-  if(!getData('homeSettings')) setData('homeSettings', DEFAULTS.homeSettings);
-  if(!getData('categorySettings')) setData('categorySettings', DEFAULTS.categorySettings);
-  if(!getData('freshSettings')) setData('freshSettings', DEFAULTS.freshSettings);
+const firebaseConfig = {
+  apiKey: "AIzaSyChGeC6WfCZsc0aTUPCTc3O8bsH27lnKF0",
+  authDomain: "guangming-store.firebaseapp.com",
+  projectId: "guangming-store",
+  storageBucket: "guangming-store.firebasestorage.app",
+  messagingSenderId: "1047992665445",
+  appId: "1:1047992665445:web:f30402e1f6d835c8adcd8c"
+};
+firebase.initializeApp(firebaseConfig);
+const db      = firebase.firestore();
+const storage = firebase.storage();
+const auth    = firebase.auth();
 
-  // productTabs：有就合併新增的，沒有就用預設
-  const savedTabs = getData('productTabs');
-  if(!savedTabs){
-    setData('productTabs', DEFAULTS.productTabs);
-  } else {
-    const existIds = new Set(savedTabs.map(t=>t.id));
-    const newTabs = DEFAULTS.productTabs.filter(t=>!existIds.has(t.id));
-    if(newTabs.length) setData('productTabs', [...savedTabs, ...newTabs]);
+// ══════════════════════════════════════════
+//  IN-MEMORY CACHE + FIRESTORE 存取
+// ══════════════════════════════════════════
+let _cache = {};
+
+function getData(key){ return (_cache[key] !== undefined) ? _cache[key] : null; }
+
+function setData(key, val){
+  _cache[key] = val;
+  if(key !== 'products'){
+    db.collection('settings').doc(key).set({ value: val }).catch(console.error);
+  }
+}
+
+function getProducts(){ return _cache.products || []; }
+
+async function saveOneProduct(product){
+  _cache.products = getProducts().map(p => p.id === product.id ? product : p);
+  if(!_cache.products.find(p => p.id === product.id)) _cache.products.push(product);
+  await db.collection('products').doc(String(product.id)).set(product);
+}
+
+async function uploadToStorage(b64, path){
+  const ref = storage.ref(path);
+  await ref.putString(b64, 'data_url');
+  return await ref.getDownloadURL();
+}
+
+async function maybeUpload(b64OrUrl, path){
+  if(!b64OrUrl) return '';
+  if(b64OrUrl.startsWith('data:')) return await uploadToStorage(b64OrUrl, path);
+  return b64OrUrl; // already a URL
+}
+
+async function initFromFirestore(){
+  const SETTINGS_KEYS = ['storeSettings','homeSettings','categorySettings','freshSettings','productTabs'];
+
+  // 載入設定（不存在則用預設值寫入）
+  for(const key of SETTINGS_KEYS){
+    const doc = await db.collection('settings').doc(key).get();
+    if(doc.exists){
+      _cache[key] = doc.data().value;
+    } else {
+      _cache[key] = DEFAULTS[key] || null;
+      if(_cache[key]) await db.collection('settings').doc(key).set({ value: _cache[key] });
+    }
   }
 
-  // products：有就合併新增的（保留後台上傳的圖片與自訂資料），沒有就用預設
-  const savedProds = getData('products');
-  if(!savedProds){
-    setData('products', DEFAULTS.products);
+  // 載入商品（智慧合併：有就保留，新增的 DEFAULTS 商品才補進去）
+  const snap = await db.collection('products').get();
+  if(snap.empty){
+    _cache.products = DEFAULTS.products;
+    const batch = db.batch();
+    DEFAULTS.products.forEach(p => batch.set(db.collection('products').doc(String(p.id)), p));
+    await batch.commit();
   } else {
-    const existIds = new Set(savedProds.map(p=>p.id));
-    const newProds = DEFAULTS.products.filter(p=>!existIds.has(p.id));
-    if(newProds.length) setData('products', [...savedProds, ...newProds]);
+    const firestoreProds = snap.docs.map(d => d.data());
+    const existIds = new Set(firestoreProds.map(p => p.id));
+    const newProds = DEFAULTS.products.filter(p => !existIds.has(p.id));
+    if(newProds.length){
+      const batch = db.batch();
+      newProds.forEach(p => batch.set(db.collection('products').doc(String(p.id)), p));
+      await batch.commit();
+    }
+    _cache.products = [...firestoreProds, ...newProds];
   }
 }
 
 // ══════════════════════════════════════════
-//  LOGIN
+//  LOGIN（Firebase Auth）
 // ══════════════════════════════════════════
 function doLogin(){
-  initData();
-  const pwd = document.getElementById('pwdInput').value;
-  const stored = getData('password') || DEFAULTS.password;
-  if(pwd === stored){
-    document.getElementById('loginScreen').style.display='none';
-    document.getElementById('adminApp').style.display='block';
-    loadAllFields();
-  } else {
-    document.getElementById('loginErr').style.display='block';
-    document.getElementById('pwdInput').value='';
-    document.getElementById('pwdInput').focus();
-  }
+  const email = document.getElementById('loginEmail').value.trim();
+  const pwd   = document.getElementById('pwdInput').value;
+  const errEl = document.getElementById('loginErr');
+  const btn   = document.querySelector('.login-btn');
+  errEl.style.display = 'none';
+  if(!email || !pwd){ errEl.style.display='block'; errEl.textContent='❌ 請填入 Email 與密碼'; return; }
+  btn.textContent = '登入中…';
+  auth.signInWithEmailAndPassword(email, pwd).catch(() => {
+    errEl.style.display = 'block';
+    errEl.textContent = '❌ 帳號或密碼錯誤，請重試';
+    btn.textContent = '登入後台';
+  });
 }
 function doLogout(){
-  document.getElementById('loginScreen').style.display='flex';
-  document.getElementById('adminApp').style.display='none';
-  document.getElementById('pwdInput').value='';
-  document.getElementById('loginErr').style.display='none';
+  auth.signOut();
 }
+
+// Firebase Auth 狀態監聽：登入成功 → 載入資料；登出 → 回到登入畫面
+auth.onAuthStateChanged(async user => {
+  if(user){
+    document.querySelector('.login-btn').textContent = '資料載入中…';
+    await initFromFirestore();
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminApp').style.display   = 'block';
+    document.querySelector('.login-btn').textContent = '登入後台';
+    loadAllFields();
+  } else {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminApp').style.display   = 'none';
+    document.getElementById('loginEmail') && (document.getElementById('loginEmail').value = '');
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('loginErr').style.display = 'none';
+  }
+});
 
 // ══════════════════════════════════════════
 //  NAVIGATION
@@ -855,14 +926,19 @@ function loadHomeSettings(){
   renderTrustList(d.trust||[]);
   renderFeaturesEditor(d.features||[]);
 }
-function saveHomeSettings(){
+async function saveHomeSettings(){
+  showSaveToast('⏳ 儲存中…');
+  logoImageB64    = await maybeUpload(logoImageB64,    'settings/logo.jpg');
+  heroBgImageB64  = await maybeUpload(heroBgImageB64,  'settings/heroBg.jpg');
+
   const trust = [...document.querySelectorAll('.trust-item-input')].map(i=>i.value).filter(v=>v.trim());
-  const features = [...document.querySelectorAll('.feat-item')].map(fi=>({
+  const features = await Promise.all([...document.querySelectorAll('.feat-item')].map(async (fi,i)=>({
     icon: fi.querySelector('.feat-icon-emoji').value,
-    iconImage: fi.querySelector('.feat-icon-img-data').value,
+    iconImage: await maybeUpload(fi.querySelector('.feat-icon-img-data').value, `settings/feat_${i}.jpg`),
     title: fi.querySelector('.feat-title').value,
     desc: fi.querySelector('.feat-desc').value
-  }));
+  })));
+
   setData('homeSettings',{
     badge:document.getElementById('hs-badge').value,
     title1:document.getElementById('hs-title1').value,
@@ -948,7 +1024,10 @@ function loadCategorySettings(){
   if(d.cat2.bgImage){ cat2BgImageB64=d.cat2.bgImage; document.getElementById('cat2BgPreview').src=d.cat2.bgImage; document.getElementById('cat2BgPreview').style.display='block'; document.getElementById('cat2BgPlaceholder').style.display='none'; }
   else { cat2BgImageB64=''; document.getElementById('cat2BgPreview').style.display='none'; document.getElementById('cat2BgPlaceholder').style.display='block'; }
 }
-function saveCategorySettings(){
+async function saveCategorySettings(){
+  showSaveToast('⏳ 儲存中…');
+  cat1BgImageB64 = await maybeUpload(cat1BgImageB64, 'settings/cat1Bg.jpg');
+  cat2BgImageB64 = await maybeUpload(cat2BgImageB64, 'settings/cat2Bg.jpg');
   setData('categorySettings',{
     cat1:{tag:document.getElementById('cat1-tag').value,name:document.getElementById('cat1-name').value,desc:document.getElementById('cat1-desc').value,bgImage:cat1BgImageB64},
     cat2:{tag:document.getElementById('cat2-tag').value,name:document.getElementById('cat2-name').value,desc:document.getElementById('cat2-desc').value,bgImage:cat2BgImageB64}
@@ -968,8 +1047,7 @@ let cat2BgImageB64 = '';
 let freshBgImageB64 = '';
 let currentFilter = 'all';
 
-function getProducts(){ return getData('products') || DEFAULTS.products; }
-function saveProducts(list){ setData('products', list); }
+// getProducts / saveProducts 由 _cache 及 Firestore 處理
 
 function renderProductListTabs(){
   const tabs = getTabs();
@@ -1073,25 +1151,36 @@ function clearForm(){
 
 function closeProductModal(){ document.getElementById('productModal').classList.add('hidden'); }
 
-function saveProduct(){
+async function saveProduct(){
   const name = document.getElementById('p-name').value.trim();
   const price = parseInt(document.getElementById('p-price').value);
   if(!name){ alert('請填入商品名稱'); return; }
   if(!price||price<=0){ alert('請填入正確的售價'); return; }
 
+  const productId = editingProductId !== null ? editingProductId : Date.now();
+
+  // 上傳亮點圖示（base64 → Storage URL）
   const highlights = [];
-  const icons = document.querySelectorAll('.hl-icon');
+  const icons   = document.querySelectorAll('.hl-icon');
   const iconImgs = document.querySelectorAll('.hl-icon-img');
-  const texts = document.querySelectorAll('.hl-text');
-  icons.forEach((el,i)=>{ if(el.value||texts[i].value||iconImgs[i].value) highlights.push({icon:el.value,iconImage:iconImgs[i].value,text:texts[i].value}); });
+  const texts   = document.querySelectorAll('.hl-text');
+  for(let i=0;i<icons.length;i++){
+    if(icons[i].value||texts[i].value||iconImgs[i].value){
+      const imgUrl = await maybeUpload(iconImgs[i].value, `products/${productId}/hl_${i}.jpg`);
+      highlights.push({icon:icons[i].value, iconImage:imgUrl, text:texts[i].value});
+    }
+  }
+
+  // 上傳主圖（base64 → Storage URL，若已是 URL 則直接用）
+  const imageUrl = await maybeUpload(uploadedImageB64, `products/${productId}/main.jpg`);
 
   const product = {
-    id: editingProductId!==null ? editingProductId : Date.now(),
+    id: productId,
     cat: document.getElementById('p-cat').value,
-    catLabel: document.getElementById('p-cat').value==='life' ? '有機生活用品 · 律活綠活' : '天然漢方草本護膚品 · 神采彤妍',
+    catLabel: getCatLabelAdmin(document.getElementById('p-cat').value),
     name,
     emoji: document.getElementById('p-emoji').value || '📦',
-    image: uploadedImageB64,
+    image: imageUrl,
     price,
     origPrice: parseInt(document.getElementById('p-orig-price').value)||0,
     badge: document.getElementById('p-badge').value,
@@ -1104,19 +1193,18 @@ function saveProduct(){
     highlights
   };
 
-  let list = getProducts();
-  if(editingProductId!==null){ list = list.map(p=>p.id===editingProductId?product:p); }
-  else { list.push(product); }
-  saveProducts(list);
+  showSaveToast('⏳ 儲存中…');
+  await saveOneProduct(product);
   closeProductModal();
   renderProductList(currentFilter);
-  showSaveToast();
+  showSaveToast('✅ 已儲存！');
 }
 
-function deleteProduct(id){
+async function deleteProduct(id){
   const p = getProducts().find(x=>x.id===id);
   if(!confirm(`確定要刪除「${p.name}」嗎？此動作無法還原。`)) return;
-  saveProducts(getProducts().filter(x=>x.id!==id));
+  _cache.products = getProducts().filter(x=>x.id!==id);
+  await db.collection('products').doc(String(id)).delete();
   renderProductList(currentFilter);
   showSaveToast('🗑️ 已刪除');
 }
@@ -1243,7 +1331,9 @@ function loadFreshSettings(){
   document.getElementById('fs-url').value = d.url||'';
   renderFreshFeatureList(d.features||[]);
 }
-function saveFreshSettings(){
+async function saveFreshSettings(){
+  showSaveToast('⏳ 儲存中…');
+  freshBgImageB64 = await maybeUpload(freshBgImageB64, 'settings/freshBg.jpg');
   const features = [...document.querySelectorAll('.fresh-feat-input')].map(i=>i.value).filter(v=>v.trim());
   setData('freshSettings',{
     bgImage: freshBgImageB64,
@@ -1278,26 +1368,38 @@ function addFreshFeatureItem(){
 // ══════════════════════════════════════════
 //  PASSWORD
 // ══════════════════════════════════════════
-function changePassword(){
+async function changePassword(){
   const cur = document.getElementById('pwd-current').value;
-  const nw = document.getElementById('pwd-new').value;
+  const nw  = document.getElementById('pwd-new').value;
   const con = document.getElementById('pwd-confirm').value;
   const msg = document.getElementById('pwd-msg');
   msg.style.display='block';
-  if(cur !== (getData('password')||DEFAULTS.password)){ msg.style.color='var(--danger)'; msg.textContent='❌ 目前密碼錯誤'; return; }
   if(nw.length < 6){ msg.style.color='var(--danger)'; msg.textContent='❌ 新密碼至少需要6個字元'; return; }
   if(nw !== con){ msg.style.color='var(--danger)'; msg.textContent='❌ 兩次輸入的密碼不一致'; return; }
-  setData('password', nw);
-  msg.style.color='var(--green)'; msg.textContent='✅ 密碼已成功更新！';
-  document.getElementById('pwd-current').value='';
-  document.getElementById('pwd-new').value='';
-  document.getElementById('pwd-confirm').value='';
+  try {
+    const user = auth.currentUser;
+    const cred = firebase.auth.EmailAuthProvider.credential(user.email, cur);
+    await user.reauthenticateWithCredential(cred);
+    await user.updatePassword(nw);
+    msg.style.color='var(--green)'; msg.textContent='✅ 密碼已成功更新！';
+    document.getElementById('pwd-current').value='';
+    document.getElementById('pwd-new').value='';
+    document.getElementById('pwd-confirm').value='';
+  } catch(e){
+    msg.style.color='var(--danger)'; msg.textContent='❌ 目前密碼錯誤，請重新確認';
+  }
 }
 
-function resetAll(){
+async function resetAll(){
   if(!confirm('確定要重置所有設定嗎？所有商品資料與設定都將恢復預設值，此動作無法還原。')) return;
-  ['password','storeSettings','homeSettings','categorySettings','productTabs','products','freshSettings'].forEach(k=>localStorage.removeItem('gm_'+k));
-  initData();
+  const prodSnap = await db.collection('products').get();
+  const b1 = db.batch();
+  prodSnap.docs.forEach(d => b1.delete(d.ref));
+  await b1.commit();
+  const b2 = db.batch();
+  ['storeSettings','homeSettings','categorySettings','freshSettings','productTabs'].forEach(k => b2.delete(db.collection('settings').doc(k)));
+  await b2.commit();
+  await initFromFirestore();
   loadAllFields();
   renderProductList('all');
   alert('已重置完成！');
