@@ -1633,7 +1633,7 @@ function applyAdminData(){
     if(title && hs.title1) title.innerHTML = `${hs.title1}<br><em>${hs.title2||''}</em>`;
 
     const desc = document.querySelector('.hero-desc');
-    if(desc && hs.desc) desc.textContent = hs.desc;
+    if(desc && hs.desc) desc.innerHTML = hs.desc.replace(/\n/g,'<br>');
 
     const btn1 = document.querySelector('.hero-btns .btn-white');
     if(btn1 && hs.btn1) btn1.textContent = hs.btn1;
@@ -1710,13 +1710,13 @@ function applyAdminData(){
     if(cat1 && cs.cat1){
       const tag=cat1.querySelector('.cat-tag'); if(tag)tag.textContent=cs.cat1.tag;
       const name=cat1.querySelector('.cat-name'); if(name)name.textContent=cs.cat1.name;
-      const desc=cat1.querySelector('.cat-desc'); if(desc)desc.textContent=cs.cat1.desc;
+      const desc=cat1.querySelector('.cat-desc'); if(desc)desc.innerHTML=(cs.cat1.desc||'').replace(/\n/g,'<br>');
     }
     const cat2 = document.querySelector('.cat-card-2');
     if(cat2 && cs.cat2){
       const tag=cat2.querySelector('.cat-tag'); if(tag)tag.textContent=cs.cat2.tag;
       const name=cat2.querySelector('.cat-name'); if(name)name.textContent=cs.cat2.name;
-      const desc=cat2.querySelector('.cat-desc'); if(desc)desc.textContent=cs.cat2.desc;
+      const desc=cat2.querySelector('.cat-desc'); if(desc)desc.innerHTML=(cs.cat2.desc||'').replace(/\n/g,'<br>');
       if(cs.cat2.bgImage){
         cat2.style.backgroundImage=`linear-gradient(160deg, rgba(107,79,42,0.65), rgba(196,168,130,0.55)), url(${cs.cat2.bgImage})`;
         cat2.style.backgroundSize='cover';
@@ -1753,7 +1753,7 @@ function applyAdminData(){
     if(titleEl && (fs.title1||fs.title2)) titleEl.innerHTML = `${fs.title1||''}<br><em style="font-style:normal;color:#b7e4c7">${fs.title2||''}</em>`;
     // 描述
     const descEl = banner && banner.querySelector('.fresh-desc');
-    if(descEl && fs.desc) descEl.textContent = fs.desc;
+    if(descEl && fs.desc) descEl.innerHTML = fs.desc.replace(/\n/g,'<br>');
     // 特色清單
     if(fs.features && fs.features.length){
       const featEl = banner && banner.querySelector('.fresh-features');
