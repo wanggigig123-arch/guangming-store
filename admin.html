@@ -624,10 +624,21 @@ const DEFAULTS = {
     cat2: { tag:'神采彤妍', name:'天然漢方草本護膚品', desc:'融合千年漢方智慧與現代工藝，以天然草本呵護您的每一寸肌膚。', bgImage: '' }
   },
   productTabs: [
-    {id:'set', label:'護膚套組'},
-    {id:'life', label:'有機生活用品'},
-    {id:'skin', label:'天然漢方護膚品'},
-    {id:'hair', label:'頭皮養護'}
+    {id:'life',       label:'有機生活用品'},
+    {id:'set',        label:'護膚套組'},
+    {id:'rose',       label:'玫瑰彤妍系列'},
+    {id:'xingyan',    label:'形妍靚麗系列'},
+    {id:'tiffany',    label:'蒂芳妮銀璽系列'},
+    {id:'whitening',  label:'美麗人生靚白系列'},
+    {id:'cleanse',    label:'清潔系列'},
+    {id:'moisturize', label:'保濕系列'},
+    {id:'toning',     label:'調理系列'},
+    {id:'mask',       label:'面膜系列'},
+    {id:'makeup',     label:'彩妝系列'},
+    {id:'fragrance',  label:'香氛系列'},
+    {id:'soothe',     label:'舒緩系列'},
+    {id:'scalp',      label:'頭皮保養系列'},
+    {id:'other',      label:'其他系列'},
   ],
   products: [
     // 護膚套組（含美妍館12次服務）
@@ -683,7 +694,35 @@ const DEFAULTS = {
     {id:54,cat:'skin',name:'精采顏值美膚液 175ml',emoji:'💎',image:'',price:1500,origPrice:0,badge:'',shortDesc:'草本滲透高效保濕液，提升肌膚吸收力，淨化毛孔，由內而外散發自然光澤',tags:['草本高滲透','保濕活化','淨化毛孔','自然光澤'],intro:'以草本多重萃取液為核心（山藥、紫蘇、香燕、番茄、小黃瓜、冬瓜、敏豆、香水蓮花、洛神花、桔皮、蘋果、玉竹、菊花、麥冬、益母草），卓越的滲透力保濕、水嫩、活化肌膚，提升吸收力，淨化毛孔，由內而外散發自然光澤。',ingredients:'草本萃取液（山藥、紫蘇、香燕、番茄、小黃瓜、冬瓜、敏豆、香水蓮花、洛神花、桔皮、蘋果、玉竹、菊花、麥冬、益母草）',howToUse:'潔膚後取適量輕拍全臉，待吸收後使用精華液及乳霜，早晚均可使用。',cautions:'・避免直接接觸眼睛\n・置於陰涼乾燥處\n・開封後6個月內使用完畢',highlights:[{icon:'💎',text:'草本多重萃取配方'},{icon:'⬆️',text:'提升保養品吸收力'},{icon:'🌟',text:'淨化毛孔自然光澤'},{icon:'💧',text:'深層保濕活化肌膚'}]},
     {id:55,cat:'skin',name:'精采顏值美膚液 補充瓶 350ml',emoji:'💎',image:'',price:2700,origPrice:0,badge:'超值補充',shortDesc:'精采顏值美膚液超值補充瓶，同樣草本配方更大容量，日常保濕更經濟實惠',tags:['補充瓶','超值容量','草本高滲透','經濟實惠'],intro:'補充瓶（350ml）採用與正裝相同的草本多重萃取液配方，超值大容量讓日常保濕更經濟實惠，同樣卓越的滲透力保濕、活化肌膚，由內而外散發自然光澤。',ingredients:'草本萃取液（山藥、紫蘇、香燕、番茄、小黃瓜、冬瓜、敏豆、香水蓮花、洛神花、桔皮、蘋果、玉竹、菊花、麥冬、益母草）',howToUse:'潔膚後取適量輕拍全臉，待吸收後接續後續保養步驟，早晚均可使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'💰',text:'超值大容量補充瓶'},{icon:'💎',text:'與正裝相同配方'},{icon:'💧',text:'深層保濕活化肌膚'},{icon:'🌿',text:'草本多重萃取精華'}]},
     {id:56,cat:'skin',name:'美麗人生靚白 美膚液 100ml',emoji:'🌸',image:'',price:4500,origPrice:0,badge:'',shortDesc:'草本精華深入肌膚皮層，補水潤澤維持潤澤平衡，光澤富彈性透亮潤澤',tags:['草本美白','深層補水','彈性光澤','透亮潤澤'],intro:'以草本配方精華深入肌膚皮層，補水潤澤，使肌膚保持活力和彈性，維持肌膚的潤澤平衡。成分含草本萃取（小黃瓜、山藥、香水蓮花、蘆薈、白藤菊、綠豆、菊花、蒲公英、麥冬、石斛）、白木耳、海藻醣、地衣、多元醇，肌膚光澤富有彈性，賦活肌膚，潔淨更顯透亮潤澤。',ingredients:'草本萃取（小黃瓜、山藥、香水蓮花、蘆薈、白藤菊、綠豆、菊花、蒲公英、麥冬、石斛）、白木耳、海藻醣、地衣、多元醇',howToUse:'潔膚後取適量均勻輕拍全臉，待完全吸收後再進行後續保養，早晚各一次。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處\n・開封後6個月內使用完畢',highlights:[{icon:'🌸',text:'草本深層補水精華'},{icon:'✨',text:'光澤彈性透亮肌膚'},{icon:'🌿',text:'白木耳海藻醣滋潤'},{icon:'💧',text:'維持肌膚潤澤平衡'}]},
-    {id:52,cat:'skin',name:'明眸唇漾防護蜜 50ml',emoji:'👁️',image:'',price:1500,origPrice:0,badge:'',shortDesc:'眼唇專用防護蜜，草本滋潤修護，防禦環境傷害保持嬌嫩水潤',tags:['眼唇防護','草本滋潤','嬌嫩修護','環境防禦'],intro:'明眸唇漾防護蜜專為眼唇嬌嫩部位設計，草本滋潤精華防禦日間環境傷害（UV、乾燥、污染），保持眼周及唇部持續嬌嫩水潤，輕薄服貼不黏膩。',ingredients:'草本萃取液（玫瑰、甘菊、蘆薈、白木耳）、Glycerine、Sodium Hyaluronate、Vitamin E、Aqua',howToUse:'每日早晨保養後取少量輕拍塗抹眼周及唇部，全日可重複補擦，可在上彩妝前作底妝防護。',cautions:'・避免直接入眼\n・若有不適請停用',highlights:[{icon:'👁️',text:'眼唇專用防護配方'},{icon:'🌿',text:'草本滋潤修護精華'},{icon:'🛡️',text:'防禦環境UV傷害'},{icon:'💧',text:'全日嬌嫩水潤'}]},
+    {id:52,cat:'other',name:'明眸唇漾防護蜜 50ml',emoji:'👁️',image:'',price:1500,origPrice:0,badge:'',shortDesc:'眼唇專用防護蜜，草本滋潤修護，防禦環境傷害保持嬌嫩水潤',tags:['眼唇防護','草本滋潤','嬌嫩修護','環境防禦'],intro:'明眸唇漾防護蜜專為眼唇嬌嫩部位設計，草本滋潤精華防禦日間環境傷害（UV、乾燥、污染），保持眼周及唇部持續嬌嫩水潤，輕薄服貼不黏膩。',ingredients:'草本萃取液（玫瑰、甘菊、蘆薈、白木耳）、Glycerine、Sodium Hyaluronate、Vitamin E、Aqua',howToUse:'每日早晨保養後取少量輕拍塗抹眼周及唇部，全日可重複補擦，可在上彩妝前作底妝防護。',cautions:'・避免直接入眼\n・若有不適請停用',highlights:[{icon:'👁️',text:'眼唇專用防護配方'},{icon:'🌿',text:'草本滋潤修護精華'},{icon:'🛡️',text:'防禦環境UV傷害'},{icon:'💧',text:'全日嬌嫩水潤'}]},
+    // 玫瑰彤妍系列
+    {id:57,cat:'rose',name:'玫瑰滋養 形妍靚麗 潔膚乳 100ml',emoji:'🌹',image:'',price:4000,origPrice:0,badge:'',shortDesc:'草本蔬果萃取親膚潔膚配方，溫和清潔深層補水，洗後光潔透亮不緊繃',tags:['玫瑰精油','草本潔膚','溫和深層','透亮潔淨'],intro:'以蔬果、草本萃取液為核心，搭配珍貴玫瑰精油，溫和清潔肌膚同時補充保養能量，洗後光潔透亮、觸感柔嫩。',ingredients:'蔬果、草本萃取液（高麗菜、蘆筍、白藜葡、枸杞、香水蓮花、山藥、白薏仁、明日葉、黃豆、玫瑰花、麥冬、金銀花、馬齒莧）、Hydroxyethyl Cellulose、Sodium Cocoyl Isethionate、TEA-Cocoyl Glutamate、Hexamidine Diisethionate、Glycerine',howToUse:'取適量加水起泡，輕柔按摩30秒後沖洗，早晚使用。',cautions:'・避免接觸眼睛\n・置於兒童不易取得處',highlights:[{icon:'🌹',text:'玫瑰精油潔膚配方'},{icon:'💧',text:'溫和深層清潔補水'},{icon:'✨',text:'洗後光潔透亮柔嫩'},{icon:'🌿',text:'草本蔬果萃取精華'}]},
+    {id:58,cat:'rose',name:'玫瑰滋養 形妍靚麗 精華液 100ml',emoji:'🌹',image:'',price:6500,origPrice:0,badge:'',shortDesc:'玫瑰精油草本精華液，啟動肌膚保濕能量，賦活調理紋路潤澤光澤',tags:['玫瑰精油','草本精華','深層保濕','光澤調理'],intro:'以蔬果及草本複方調製，啟動肌膚保濕力，注入肌膚保濕，潤澤調理肌膚紋路，讓肌膚更顯光滑、潤澤。',ingredients:'草本萃取液（蒲公英、金銀花、西洋參、玉竹、糯米、小黃瓜、冬瓜、蘋果、香水蓮花、玫瑰、蘆薈）、玫瑰精油、迷迭香萃取液、橄欖脂、茶樹萃取液、檸檬酸',howToUse:'潔膚後取適量均勻拍按全臉，輕柔按摩至吸收，接續乳霜保養。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌹',text:'珍貴玫瑰精油精華'},{icon:'💧',text:'啟動深層保濕能量'},{icon:'✨',text:'潤澤調理肌膚光澤'},{icon:'🌿',text:'草本蔬果複方精粹'}]},
+    {id:59,cat:'rose',name:'玫瑰滋養 形妍靚麗 精華乳 50ml',emoji:'🌹',image:'',price:8000,origPrice:0,badge:'',shortDesc:'蔬果主調草本複方專業調配，幫助肌膚保濕潤澤，調理肌膚紋路光滑',tags:['玫瑰精油','精華乳','蔬果主調','深層潤澤'],intro:'蔬果為主、草本複方為輔的專業調配，啟動肌膚保濕能量，注入肌膚活化、調理肌膚紋路，讓肌膚更顯光滑、潤澤。',ingredients:'蔬果、草本萃取液（雲蓮子、蓮藕、香燕、馬鈴薯、苦瓜、芹菜、白藜葡、蘋果、芥藍、小黃瓜、金針菇、茄子、甜菜根、紫蘇、綠豆）、藍藻、椰子辛酸胺基酸',howToUse:'精華液後取適量均勻塗抹全臉，輕柔按摩至完全吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌹',text:'玫瑰精油乳質精華'},{icon:'🌿',text:'蔬果草本複方調製'},{icon:'💧',text:'深層潤澤調理肌膚'},{icon:'✨',text:'光滑潤澤光采感'}]},
+    {id:60,cat:'rose',name:'玫瑰滋養 形妍靚麗 精華乳霜 30ml',emoji:'🌹',image:'',price:8500,origPrice:0,badge:'',shortDesc:'玫瑰精油賦活潤澤乳霜，提供深層滋養保濕，肌膚飽滿光澤彈力',tags:['玫瑰乳霜','深層滋養','飽滿彈力','賦活光澤'],intro:'以蒲公英、玉竹、天冬等草本萃取結合珍貴玫瑰精油，提供豐富的深層滋養保濕，使肌膚飽滿光澤，充滿彈力。',ingredients:'草本萃取（蒲公英、玉竹、天冬、香附子、西洋參、天門冬、麥冬、黃精、當歸、黃豆、糯米、香水蓮花、玫瑰、蘆薈、山藥、白藜葡）、椰子油、蔗糖棕櫚油、亞麻籽油、蜂王乳、海藻膠、地衣',howToUse:'精華乳後取適量塗抹全臉及頸部，輕柔按摩至吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌹',text:'玫瑰精油深層滋養'},{icon:'💆',text:'豐富草本複方精粹'},{icon:'✨',text:'飽滿光澤有彈力'},{icon:'🌿',text:'蜂王乳海藻膠修護'}]},
+    {id:61,cat:'rose',name:'玫瑰滋養 形妍靚麗 眼部精華 15ml',emoji:'🌹',image:'',price:7000,origPrice:0,badge:'',shortDesc:'玫瑰精油眼部精華，草本精華呵護眼周，撫平細紋使眼肌細嫩',tags:['眼部精華','玫瑰精油','撫平細紋','細嫩眼周'],intro:'以草本精華與蔬果蒸餾精華，添加珍貴玫瑰精油，給予眼部肌膚細膩呵護，滋養眼周肌膚，撫平細紋，舒活眼部肌膚更顯光滑細嫩。',ingredients:'草本萃取（蒲公英、西洋參、玉竹、當歸、枸杞、黃豆、糯米、香水蓮花、玫瑰、蘆薈、白藜葡、蘋果）、玫瑰精油、白木耳、海藻膠、橄欖油、棕櫚油、地衣',howToUse:'取少量以指腹輕點眼周，由內向外輕柔按摩至吸收，早晚使用。',cautions:'・勿入眼\n・眼睛周圍敏感者先測試',highlights:[{icon:'🌹',text:'玫瑰精油眼部滋養'},{icon:'💆',text:'草本精華呵護眼周'},{icon:'✨',text:'撫平細紋細嫩光滑'},{icon:'🌿',text:'白木耳海藻膠滋潤'}]},
+    {id:62,cat:'rose',name:'玫瑰滋養 形妍靚麗 精華凝露 30ml',emoji:'🌹',image:'',price:7000,origPrice:0,badge:'',shortDesc:'結合草本蔬果配方加玫瑰精油，親膚凝膠快速滲透，淨化明亮透亮感',tags:['精華凝露','玫瑰精油','快速滲透','親膚凝膠'],intro:'結合草本及蔬果配方，添加珍貴玫瑰精油，調和出的凝膠質地，迅速與肌膚融合、滋潤肌膚，深層呵護保養，有效淨化明亮膚色，肌膚更顯滋潤透亮感。',ingredients:'草本萃取（蒲公英、紫花地丁、玉竹、黃精、當歸、黃豆、小黃瓜、香水蓮花、玫瑰、蘆薈）、玫瑰精油、鼠尾草、柑橘油、白木耳、珊瑚藻、海藻膠',howToUse:'精華液後取適量均勻塗抹全臉，輕柔按摩至吸收，重點部位可加強。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌹',text:'玫瑰精油凝露精華'},{icon:'💧',text:'快速滲透深層保養'},{icon:'✨',text:'淨化明亮透亮感'},{icon:'🌿',text:'珊瑚藻白木耳滋潤'}]},
+    {id:63,cat:'rose',name:'玫瑰滋養 形妍靚麗 緊緻敷容霜 30ml',emoji:'🌹',image:'',price:8500,origPrice:0,badge:'',shortDesc:'草本蔬果玫瑰精油緊緻霜，獨特保濕水配方，撫平細紋保持肌膚緊緻',tags:['緊緻霜','玫瑰精油','撫平細紋','深層保濕'],intro:'以草本蔬果配方結合珍貴玫瑰精油，獨特的保濕水配方，撫平細紋保持肌膚緊緻。',ingredients:'草本萃取（金銀花、紫花地丁、香附子、西洋參、玉竹、麥冬、香水蓮花、當歸、枸杞、黃豆、糯米、玫瑰、蘆薈、小黃瓜、馬鈴薯）、玫瑰精油、大豆磷脂、橄欖脂、椰子油、蔗糖棕櫚油、蜂膠、龍舌蘭',howToUse:'精華乳後取適量均勻塗抹全臉，輕柔拍按至吸收，作為最後一層保養步驟。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌹',text:'玫瑰精油緊緻配方'},{icon:'🌿',text:'草本蔬果精萃複方'},{icon:'✨',text:'撫平細紋緊緻肌膚'},{icon:'💧',text:'獨特保濕水潤配方'}]},
+    // 形妍靚麗系列
+    {id:64,cat:'xingyan',name:'形妍靚麗 卸妝乳 100ml',emoji:'🌸',image:'',price:3000,origPrice:0,badge:'',shortDesc:'草本蔬果萃取卸妝乳，質地溫和細緻，卸妝保養兼顧，使用後光潔透亮',tags:['形妍靚麗','草本卸妝','保養卸妝','光潔透亮'],intro:'草本配方質地溫和細緻，一方面呵護肌膚，一方面滲入深層清潔代謝，讓肌膚從底層透出淨白光彩，使用後光滑清爽、透亮不緊繃。',ingredients:'草本萃取（荷葉、麥冬、山藥）、PEG-7 GLYCERYL COCOATE、PERFUME、CITRIC ACID、SODIUM ACRYLATES/ACRYLOYDIMETHYL TAURATE COPOLYMER、MINERAL OIL TRIDECETH-6、AQUA',howToUse:'乾燥或濕潤肌膚均可使用，取適量輕柔按摩至彩妝溶解，加水乳化後沖洗。',cautions:'・避免接觸眼睛\n・敏感肌先測試',highlights:[{icon:'🌸',text:'草本蔬果溫和配方'},{icon:'💧',text:'卸妝保養同步進行'},{icon:'✨',text:'光潔透亮不緊繃'},{icon:'🌿',text:'深層清潔代謝老廢'}]},
+    {id:65,cat:'xingyan',name:'形妍靚麗 潔膚乳 100ml',emoji:'🌸',image:'',price:3000,origPrice:0,badge:'',shortDesc:'細緻泡沫質地，深層清潔同時透出淨白光彩，洗後光滑清爽透亮不緊繃',tags:['形妍靚麗','草本潔膚','泡沫質地','透亮潔淨'],intro:'細緻的泡沫質地，一方面呵護肌膚，一方面滲入深層清潔代謝，讓肌膚從底層透出淨白光彩，使用後光滑清爽、透亮不緊繃。',ingredients:'天冬、麥冬、白芷、絲瓜露、TEA-COCOYL GLUTAMATE、SODIUM LAUROYL GLUTAMATE',howToUse:'取適量加水起泡，按摩30秒後沖洗，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌸',text:'細緻泡沫溫和清潔'},{icon:'💧',text:'深層清潔代謝老廢'},{icon:'✨',text:'透亮光潔不緊繃'},{icon:'🌿',text:'天冬麥冬草本精華'}]},
+    {id:66,cat:'xingyan',name:'形妍靚麗 精華液 100ml',emoji:'🌸',image:'',price:4500,origPrice:0,badge:'',shortDesc:'高滲透膠凍精華基質草本帶氧，絕佳配方直達肌膚底層，激活保濕潤澤力',tags:['形妍靚麗','草本帶氧','高滲透精華','保濕活化'],intro:'高滲透的膠凍精華基質及草本帶氧，絕佳配方直達肌膚底層，幫助肌膚的保濕，潤澤能量，使肌膚更顯潔淨與透亮潤澤。',ingredients:'草本萃取液（白薏仁、天冬、茯苓、山藥）、植物膠、海藻精華、茵香酸鈉、花生皮萃取、AQUA',howToUse:'潔膚後取適量以化妝棉輕拍或手掌拍按至吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌸',text:'草本帶氧高滲透配方'},{icon:'💧',text:'膠凍精華直達底層'},{icon:'✨',text:'深層保濕潤澤透亮'},{icon:'🌿',text:'白薏仁茯苓精華'}]},
+    {id:67,cat:'xingyan',name:'形妍靚麗 精華乳 50ml',emoji:'🌸',image:'',price:5500,origPrice:0,badge:'',shortDesc:'清爽乳狀精華，銀耳多醣草本配方，促進肌膚吸收賦活，潔淨透亮潤澤',tags:['形妍靚麗','草本精華乳','清爽保濕','透亮潤澤'],intro:'以草本萃取液精華促進肌膚的營養活化，有效滋潤修護層，由內而外的調理、保濕、滋養肌膚，賦活肌膚，潔淨更顯透亮潤澤。',ingredients:'草本萃取液（玉竹、麥冬、生地、白欽、沙參）、珍珠粉、銀耳多醣體、荷荷芭油、聚多醣體、植物凝膠、甜菜鹼、AQUA',howToUse:'精華液後取適量均勻塗抹全臉，輕柔按摩至吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌸',text:'銀耳多醣體潤澤'},{icon:'💧',text:'清爽滋潤不黏膩'},{icon:'✨',text:'透亮潤澤光采感'},{icon:'🌿',text:'珍珠粉玉竹精華'}]},
+    {id:68,cat:'xingyan',name:'形妍靚麗 精華乳霜 30ml',emoji:'🌸',image:'',price:6000,origPrice:0,badge:'',shortDesc:'柔軟細膩配方乳霜，植物胎盤銀耳多醣保濕，給予肌膚大量滋潤令倍感柔滑',tags:['形妍靚麗','精華乳霜','深層滋潤','柔軟細膩'],intro:'柔軟細膩的配方，保濕調和護膚，給予肌膚大量滋潤，按摩肌膚，令肌膚倍感柔滑。',ingredients:'草本萃取（生地、麥冬、冬瓜、杏仁、白芷）、聚多醣體、植物凝膠、荷荷芭油、絲氨酸、甘草酸鹽、花生皮萃取、銀耳多醣體、植物胎盤、AQUA',howToUse:'精華乳後取適量塗抹全臉及頸部，輕柔按摩至完全吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌸',text:'植物胎盤深層修護'},{icon:'💧',text:'豐富草本保濕配方'},{icon:'✨',text:'柔軟細膩倍感柔滑'},{icon:'🌿',text:'銀耳多醣體荷荷芭'}]},
+    {id:69,cat:'xingyan',name:'形妍靚麗 眼部精華 15ml',emoji:'🌸',image:'',price:6000,origPrice:0,badge:'',shortDesc:'針對眼周弱肌設計，奢華質感眼部精華，草本成分滋養撫平細紋細嫩光滑',tags:['形妍靚麗','眼部精華','撫平細紋','奢華滋養'],intro:'針對眼周弱肌膚所設計，奢華質感的眼部精華，與草本精華成分，給予肌膚滋養呵護，撫平細紋，使眼部肌膚更顯光滑細嫩。',ingredients:'草本萃取（生地、玉竹、山藥、茯苓）、珍珠粉、植物膠、珊瑚膠、酵母、茵香酸鈉、花生皮萃取、銀耳多醣體、AQUA',howToUse:'取少量以指腹輕點眼周，由內向外輕柔按摩至吸收，早晚使用。',cautions:'・勿入眼\n・眼睛敏感者請先測試',highlights:[{icon:'🌸',text:'珍珠粉眼周滋養'},{icon:'💆',text:'奢華質感精華呵護'},{icon:'✨',text:'撫平細紋細嫩光滑'},{icon:'🌿',text:'銀耳多醣體補水'}]},
+    {id:70,cat:'xingyan',name:'形妍靚麗 精華凝露 30ml',emoji:'🌸',image:'',price:5000,origPrice:0,badge:'',shortDesc:'輕盈凝膠質地快速滋養，深層呵護保濕不流失，有效淨化明亮透亮光采',tags:['形妍靚麗','精華凝露','輕盈凝膠','快速滋養'],intro:'特殊配方組成，調和出輕盈的凝膠質地，與肌膚融合性極佳，能快速滋養肌膚，深層呵護保濕，不流失，有效淨化明亮膚色，讓肌膚更顯淨透光采。',ingredients:'草本萃取（玉竹、白芷、茯苓、沙參）、小黃瓜液、微藻液、植物凝膠、酵母、海藻油膠、AQUA',howToUse:'精華液後取適量均勻塗抹全臉，輕柔按摩至吸收，重點保濕部位可加強。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌸',text:'輕盈凝膠快速滋養'},{icon:'💧',text:'深層保濕不流失'},{icon:'✨',text:'淨化明亮透亮光采'},{icon:'🌿',text:'小黃瓜微藻滋潤'}]},
+    {id:71,cat:'xingyan',name:'形妍靚麗 緊緻敷容霜 30ml',emoji:'🌸',image:'',price:6000,origPrice:0,badge:'',shortDesc:'高密度草本提取物提供肌膚養護和彈性，減少細紋增強彈性',tags:['形妍靚麗','緊緻霜','高密度草本','彈性緊緻'],intro:'高密度草本提取物為肌膚提供養護和彈性，減少細紋，增強彈性。',ingredients:'草本萃取（生地、冬瓜子、白芷、茯苓）、植物胎盤、維他命E、超氧酵素、茵香酸鈉、花生皮萃取、橄欖油脂、AQUA',howToUse:'精華乳後取適量均勻塗抹全臉，輕柔按摩至吸收，早晚使用作為最後保養步驟。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🌸',text:'高密度草本精粹'},{icon:'🌿',text:'植物胎盤修護彈性'},{icon:'✨',text:'緊緻減少細紋'},{icon:'💧',text:'橄欖油脂深層滋潤'}]},
+    // 蒂芳妮銀璽系列
+    {id:72,cat:'tiffany',name:'蒂芳妮銀璽 洗顏乳 100ml',emoji:'💍',image:'',price:0,origPrice:0,badge:'',shortDesc:'草本泡沫質地，深層清潔代謝，讓肌膚從底層透出淨白光彩，透亮不緊繃',tags:['蒂芳妮','草本洗顏','細緻泡沫','透亮潔淨'],intro:'細緻的泡沫質地，一方面呵護肌膚，一方面滲入深層清潔代謝，讓肌膚從底層透出淨白光彩，使用後光滑清爽、透亮不緊繃。',ingredients:'草本萃取液（天冬、麥冬、茯苓、白芷、百合、桔梗、桑葉、小白菜、明日葉、綠豆、蘋果）、TEA-Cocoyl Glutamate、Sodium lauroyl glutamate、Hydroxyethylcellulose、Hexamidine diisethionate、Piroctone olamine、Glycerine、Perfume、Water',howToUse:'取適量加水起泡，輕柔按摩後沖洗，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'💍',text:'蒂芳妮銀璽草本精華'},{icon:'💧',text:'細緻泡沫深層清潔'},{icon:'✨',text:'透亮光潔不緊繃'},{icon:'🌿',text:'多種草本萃取複方'}]},
+    {id:73,cat:'tiffany',name:'蒂芳妮銀璽 精華液 100ml',emoji:'💍',image:'',price:0,origPrice:0,badge:'',shortDesc:'高滲透膠凍精華幫助肌膚氧氣呼吸，藍藻多醣賦活，讓肌膚潔淨透亮潤澤',tags:['蒂芳妮','高滲透精華','藍藻多醣','透亮潤澤'],intro:'高滲透的膠凍精華基質及藻養配方，直達肌膚底層，幫助肌膚的氧氣呼吸，賦活肌膚，潔淨更顯透亮潤澤。',ingredients:'草本萃取液（冬瓜、小黃瓜、明日葉、芥藍、蘋果、黑豆、香水蓮花、茉莉花、洛神花、橘子、菊花、紫蘇、生地、牡丹皮）、藍藻多醣、魚腥草、接骨木、白柳樹皮萃取液',howToUse:'潔膚後取適量輕拍全臉至吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'💍',text:'銀璽高滲透精華'},{icon:'💧',text:'藍藻多醣賦活氧氣'},{icon:'✨',text:'深層透亮潤澤'},{icon:'🌿',text:'多種草本萃取複方'}]},
+    {id:74,cat:'tiffany',name:'蒂芳妮銀璽 精華霜 30ml',emoji:'💍',image:'',price:0,origPrice:0,badge:'',shortDesc:'多重草本成分調理養護肌膚，椰子油橄欖脂滋養，給予肌膚豐潤彈力光澤',tags:['蒂芳妮','精華霜','草本滋養','調理養護'],intro:'多重草本萃取調理養護肌膚，椰子油橄欖脂深層滋潤，給予肌膚豐潤彈力光澤。',ingredients:'草本萃取（黃豆、白薏仁、敏豆、綠豆、冬瓜、甜菜根、苦瓜、白藤葡、小白菜、芥藍、雪蓮子、木耳膠、牡丹皮、金銀花）、椰子油、橄欖油脂、地衣、山葵',howToUse:'精華液後取適量均勻塗抹全臉，輕柔按摩至吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'💍',text:'銀璽草本調理霜'},{icon:'🌿',text:'多重草本精萃滋養'},{icon:'✨',text:'豐潤彈力光澤感'},{icon:'💧',text:'椰子油橄欖脂滋潤'}]},
+    {id:75,cat:'tiffany',name:'蒂芳妮銀璽 敷容霜 30ml',emoji:'💍',image:'',price:0,origPrice:0,badge:'',shortDesc:'草本複方調理緊緻肌膚，蜂膠龍舌蘭深層修護，使肌膚彈力緊緻光澤',tags:['蒂芳妮','敷容霜','調理緊緻','草本滋養'],intro:'多重草本萃取調理及緊緻肌膚，蜂膠龍舌蘭深層修護，給予肌膚更顯緊緻彈力。',ingredients:'草本萃取（黑豆、甜菜根、冬瓜、敏豆、白藤葡、明日葉、芥藍、蒲公英、香水蓮花、銀耳、黃柏、生地、西洋參、地骨皮）、椰子油、橄欖脂、蔗糖棕櫚油、蜂膠、龍舌蘭',howToUse:'取適量均勻塗抹全臉，靜待10-15分鐘後以清水沖洗，每週2-3次。',cautions:'・避免接觸眼睛\n・使用後補充保濕',highlights:[{icon:'💍',text:'銀璽草本緊緻敷容'},{icon:'🌿',text:'蜂膠龍舌蘭滋養'},{icon:'✨',text:'調理緊緻光澤肌膚'},{icon:'💧',text:'多重草本深層修護'}]},
+    // 美麗人生靚白系列
+    {id:76,cat:'whitening',name:'美麗人生靚白 洗顏乳 120ml',emoji:'🍀',image:'',price:2500,origPrice:0,badge:'',shortDesc:'草本清潔配方有效潔淨皮脂塵垢，調理肌膚兼具保養，洗後透白滑嫩不緊繃',tags:['靚白系列','草本洗顏','透白潔淨','保養潔膚'],intro:'親膚性草本清潔配方，質地溫和細膩，有效潔淨皮脂塵垢，清潔、滋潤、調理肌膚兼具保養效果，洗後肌膚淨白滑嫩不緊繃，為後續保養做好準備。',ingredients:'草本萃取（白薏仁、黃豆、冬瓜、蘋果、苦瓜）、蘆薈液、小黃瓜液、Sodium Cocoyl Alaninate、Sodium Cocoyl Isethionate、Hydroxyethyl Cellulose、Glycerine、Citric Acid、Sodium Benzoate、Perfume',howToUse:'取適量加水起泡，輕柔按摩30秒後沖洗，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🍀',text:'白薏仁草本美白潔膚'},{icon:'💧',text:'清潔調理滋潤一次'},{icon:'✨',text:'洗後淨白滑嫩不緊繃'},{icon:'🌿',text:'蘆薈小黃瓜精華'}]},
+    {id:77,cat:'whitening',name:'美麗人生靚白 美膚乳 50ml',emoji:'🍀',image:'',price:0,origPrice:0,badge:'',shortDesc:'草本配方精華深入肌膚皮層，補水潤澤保持活力彈性，使用後輕爽不油膩',tags:['靚白系列','草本美膚乳','深層滋潤','自然光澤'],intro:'以草本配方精華，深入肌膚皮層，補水潤澤，使肌膚保持活力和彈性，維持肌膚的潤澤平衡，使用後輕爽不油膩，觸感柔嫩細膩。',ingredients:'草本萃取（蘋果、山藥、香水蓮花、蘆薈、白藤菊、綠豆、糯米、苦瓜、蒲公英、玉竹、天冬、石斛）、大豆卵磷脂、可可脂、地衣、多元醇、決明子膠',howToUse:'精華液後取適量均勻塗抹全臉，輕柔按摩至吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🍀',text:'草本精華深層補水'},{icon:'💧',text:'促進肌膚活力彈性'},{icon:'✨',text:'輕爽不油膩柔嫩感'},{icon:'🌿',text:'大豆卵磷脂石斛滋潤'}]},
+    {id:78,cat:'whitening',name:'美麗人生靚白 美膚霜 30ml',emoji:'🍀',image:'',price:0,origPrice:0,badge:'',shortDesc:'水潤質地草本植物精華，護理滋養加強吸收及彈力補充，滋潤肌膚清爽不油膩',tags:['靚白系列','草本美膚霜','水潤滋養','彈力補充'],intro:'水潤質地的草本植物精華配方，護理滋養肌膚，加強吸收及彈力補充，滋潤肌膚清爽不油膩，給肌膚青春光采。',ingredients:'草本萃取（蘋果、山藥、香水蓮花、蘆薈、小黃瓜、冬瓜、綠豆、糯米、苦瓜、蒲公英、玉竹、天冬、石斛）、大豆卵磷脂、橄欖脂、地衣、多元醇',howToUse:'精華乳後取適量塗抹全臉及頸部，輕柔按摩至吸收，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🍀',text:'水潤質地草本精華'},{icon:'💧',text:'護理滋養加強吸收'},{icon:'✨',text:'清爽不油膩青春光采'},{icon:'🌿',text:'橄欖脂大豆卵磷脂'}]},
+    // 清潔系列補充
+    {id:79,cat:'cleanse',name:'晶漾胺基酸潔面乳 120ml',emoji:'🧼',image:'',price:1170,origPrice:0,badge:'',shortDesc:'含多種維生素礦物質植物提取物，同時保持肌膚水分去除油脂妝容，溫和清爽',tags:['胺基酸潔面','礦物質植物','溫和潔淨','保持水分'],intro:'含有多種維生素和礦物質植物提取物，可在同時保持肌膚水分，去除多餘油脂、妝容及灰塵，保持肌膚清爽、舒適，適合所有膚質。',ingredients:'草本萃取液（玉竹、天門冬、麥門冬）、銀耳、絲瓜露、鹿角菜膠、酵素、SILK AMINO ACID、LAUROYL GLUTAMATE、CELLULOSE、ACYLGLUTAMATE、OLIVE OIL',howToUse:'取適量加水起泡，輕柔按摩30秒後沖洗，早晚使用。',cautions:'・避免接觸眼睛\n・置於陰涼乾燥處',highlights:[{icon:'🧼',text:'胺基酸溫和潔淨'},{icon:'💧',text:'保持肌膚水分'},{icon:'✨',text:'去除油脂妝容灰塵'},{icon:'🌿',text:'銀耳絲瓜露滋潤'}]},
   ]
 };
 
@@ -742,6 +781,20 @@ function _lsGet(key){
   try{ const v=localStorage.getItem('gm_'+key); return v?JSON.parse(v):null; }catch(e){return null;}
 }
 
+// 舊版商品分類 ID 對照表（自動修正 Firestore 中的舊資料）
+const CAT_MIGRATION = {
+  18:'fragrance', 19:'fragrance', 20:'fragrance', 21:'fragrance', 22:'fragrance', 23:'fragrance',
+  24:'cleanse',   25:'cleanse',   26:'cleanse',   27:'cleanse',
+  28:'toning',    29:'toning',    30:'toning',
+  31:'mask',      32:'mask',      33:'mask',      34:'mask',      35:'mask',
+  36:'makeup',    37:'makeup',    38:'makeup',    39:'makeup',    40:'makeup',
+  41:'soothe',    42:'soothe',    43:'soothe',
+  44:'scalp',     45:'scalp',     46:'scalp',     47:'scalp',     48:'scalp',     49:'scalp',
+  50:'other',     51:'other',     52:'other',
+  53:'moisturize',54:'moisturize',55:'moisturize',
+  56:'whitening',
+};
+
 async function initFromFirestore(){
   const SETTINGS_KEYS = ['storeSettings','homeSettings','categorySettings','freshSettings','productTabs'];
 
@@ -755,6 +808,16 @@ async function initFromFirestore(){
       _cache[key] = lsVal || DEFAULTS[key] || null;
       if(_cache[key]) await db.collection('settings').doc(key).set({ value: _cache[key] });
     }
+  }
+
+  // 自動合併 DEFAULTS 中新增的分類標籤到 Firestore
+  const currentTabs = _cache.productTabs || [];
+  const currentTabIds = new Set(currentTabs.map(t => t.id));
+  const newTabs = DEFAULTS.productTabs.filter(t => !currentTabIds.has(t.id));
+  if(newTabs.length){
+    _cache.productTabs = [...currentTabs, ...newTabs];
+    await db.collection('settings').doc('productTabs').set({ value: _cache.productTabs });
+    console.log(`✅ 已新增 ${newTabs.length} 個分類標籤`);
   }
 
   // 載入商品：Firestore 有就用（智慧合併新預設），沒有則先看 localStorage 舊資料
@@ -774,6 +837,18 @@ async function initFromFirestore(){
       const batch = db.batch();
       newProds.forEach(p => batch.set(db.collection('products').doc(String(p.id)), p));
       await batch.commit();
+    }
+    // 自動修正舊版分類 ID
+    const toUpdate = firestoreProds.filter(p => CAT_MIGRATION[p.id] && p.cat !== CAT_MIGRATION[p.id]);
+    if(toUpdate.length){
+      const batch = db.batch();
+      toUpdate.forEach(p => {
+        const newCat = CAT_MIGRATION[p.id];
+        batch.update(db.collection('products').doc(String(p.id)), { cat: newCat });
+        p.cat = newCat;
+      });
+      await batch.commit();
+      console.log(`✅ 已更新 ${toUpdate.length} 件商品分類`);
     }
     _cache.products = [...firestoreProds, ...newProds];
   }
