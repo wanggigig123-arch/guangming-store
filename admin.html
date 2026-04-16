@@ -737,27 +737,35 @@ async function maybeUpload(b64OrUrl, path){
   return b64OrUrl; // already a URL
 }
 
+// 從 localStorage 讀取本機舊資料（搬移用）
+function _lsGet(key){
+  try{ const v=localStorage.getItem('gm_'+key); return v?JSON.parse(v):null; }catch(e){return null;}
+}
+
 async function initFromFirestore(){
   const SETTINGS_KEYS = ['storeSettings','homeSettings','categorySettings','freshSettings','productTabs'];
 
-  // 載入設定（不存在則用預設值寫入）
+  // 載入設定：Firestore 有就用，沒有則先看 localStorage 舊資料，再用預設
   for(const key of SETTINGS_KEYS){
     const doc = await db.collection('settings').doc(key).get();
     if(doc.exists){
       _cache[key] = doc.data().value;
     } else {
-      _cache[key] = DEFAULTS[key] || null;
+      const lsVal = _lsGet(key);
+      _cache[key] = lsVal || DEFAULTS[key] || null;
       if(_cache[key]) await db.collection('settings').doc(key).set({ value: _cache[key] });
     }
   }
 
-  // 載入商品（智慧合併：有就保留，新增的 DEFAULTS 商品才補進去）
+  // 載入商品：Firestore 有就用（智慧合併新預設），沒有則先看 localStorage 舊資料
   const snap = await db.collection('products').get();
   if(snap.empty){
-    _cache.products = DEFAULTS.products;
+    const lsProds = _lsGet('products');
+    _cache.products = lsProds || DEFAULTS.products;
     const batch = db.batch();
-    DEFAULTS.products.forEach(p => batch.set(db.collection('products').doc(String(p.id)), p));
+    _cache.products.forEach(p => batch.set(db.collection('products').doc(String(p.id)), p));
     await batch.commit();
+    if(lsProds) console.log(`✅ 已從本機資料搬移 ${lsProds.length} 件商品到 Firebase`);
   } else {
     const firestoreProds = snap.docs.map(d => d.data());
     const existIds = new Set(firestoreProds.map(p => p.id));
