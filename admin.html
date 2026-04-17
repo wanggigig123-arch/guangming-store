@@ -456,7 +456,8 @@
       <div id="sec-tab-mgr" class="section" style="display:none">
         <div class="card">
           <div class="card-title"><span class="ct-icon">🏷️</span>精選商品分類標籤</div>
-          <p style="font-size:.85rem;color:var(--text-light);margin-bottom:16px">在這裡管理精選商品區的分類標籤，新增或刪除分類後，商品管理中的分類選單與網站前台的分類按鈕都會自動更新。</p>
+          <p style="font-size:.85rem;color:var(--text-light);margin-bottom:12px">在這裡管理精選商品區的分類標籤，新增或刪除分類後，商品管理中的分類選單與網站前台的分類按鈕都會自動更新。</p>
+          <button class="btn btn-primary" style="margin-bottom:16px;font-size:.85rem" onclick="syncTabsToFirestore()">☁️ 同步分類到雲端</button>
           <div id="tabList" style="margin-bottom:20px"></div>
           <hr style="margin:20px 0;border-color:var(--border)">
           <div class="card-title" style="font-size:.95rem;margin-bottom:12px">新增分類</div>
@@ -1131,8 +1132,25 @@ function loadAllFields(){
 // ══════════════════════════════════════════
 //  TAB / CATEGORY MANAGEMENT
 // ══════════════════════════════════════════
-function getTabs(){ return getData('productTabs') || DEFAULTS.productTabs; }
+function getTabs(){
+  const cached = getData('productTabs') || [];
+  if(!cached.length) return DEFAULTS.productTabs;
+  // 自動補入 DEFAULTS 中有但 Firestore/cache 還沒有的新分類
+  const cachedIds = new Set(cached.map(t => t.id));
+  const missing = DEFAULTS.productTabs.filter(t => !cachedIds.has(t.id));
+  return missing.length ? [...cached, ...missing] : cached;
+}
 function saveTabs(tabs){ setData('productTabs', tabs); }
+
+async function syncTabsToFirestore(){
+  const merged = getTabs();
+  setData('productTabs', merged);
+  await db.collection('settings').doc('productTabs').set({ value: merged });
+  renderTabList();
+  renderProductListTabs();
+  populateCatSelect();
+  showSaveToast('✅ 分類已同步完成');
+}
 
 function renderTabList(){
   const tabs = getTabs();
