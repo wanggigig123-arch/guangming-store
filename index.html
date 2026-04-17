@@ -1280,13 +1280,20 @@ function goBack() {
 }
 
 // ── 商品列表渲染 ──────────────────────────────────
+// 律活綠活有機生活用品的子分類 ID 列表
+const LIFE_SUB_CATS = ['shiguang','wellness','gufen','drink','pinming','snack','zaliang','cooking','lifeclean','external'];
+
 function renderProducts(filter, btn) {
   const grid = document.getElementById('productsGrid');
   let list;
   if (!filter || filter === 'all') {
     list = products;
+  } else if (filter === '__lifeAll') {
+    // 有機生活用品「全部系列」：顯示所有 life 子分類商品
+    list = products.filter(p => LIFE_SUB_CATS.includes(p.cat));
   } else if (filter === '__skinAll') {
-    list = products.filter(p => p.cat !== 'life');
+    // 護膚品「全部系列」：排除 life 及其子分類
+    list = products.filter(p => p.cat !== 'life' && !LIFE_SUB_CATS.includes(p.cat));
   } else {
     list = products.filter(p => p.cat === filter);
   }
@@ -1336,14 +1343,25 @@ function showMainCategory(mainCat) {
 
   if (mainCat === 'life') {
     titleEl.textContent = '有機生活用品';
-    subEl.textContent   = '嚴選有機環保材料，讓您的家更潔淨、更安心';
-    tabsEl.style.display = 'none';
-    renderProducts('life');
+    subEl.textContent   = '嚴選天然有機食品、養生飲品、生活清潔，守護您與家人的健康';
+    // 從所有 tabs 中取出屬於 life 子分類的分頁
+    const lifeTabs = allTabs.filter(t => LIFE_SUB_CATS.includes(t.id));
+    if (lifeTabs.length > 0) {
+      tabsEl.style.display = 'flex';
+      tabsEl.innerHTML =
+        `<button class="tab-btn active" data-cat="__lifeAll" onclick="renderProducts('__lifeAll',this)">全部系列</button>` +
+        lifeTabs.map(t =>
+          `<button class="tab-btn" data-cat="${t.id}" onclick="renderProducts('${t.id}',this)">${t.label}</button>`
+        ).join('');
+    } else {
+      tabsEl.style.display = 'none';
+    }
+    renderProducts('__lifeAll');
   } else {
-    // skin — 天然漢方草本護膚品（含 set / skin / hair 等非 life 分類）
+    // skin — 天然漢方草本護膚品（排除 life 及其子分類）
     titleEl.textContent = '天然漢方草本護膚品';
     subEl.textContent   = '融合漢方智慧與現代工藝，以天然草本呵護您的每一寸肌膚';
-    const skinTabs = allTabs.filter(t => t.id !== 'life');
+    const skinTabs = allTabs.filter(t => t.id !== 'life' && !LIFE_SUB_CATS.includes(t.id));
     if (skinTabs.length > 0) {
       tabsEl.style.display = 'flex';
       tabsEl.innerHTML =
