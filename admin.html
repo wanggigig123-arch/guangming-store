@@ -211,8 +211,14 @@
     .pwd-section{border-top:1px solid #e8f0e9;margin-top:20px;padding-top:20px}
 
     /* Highlight editor */
-    .highlight-row{display:grid;grid-template-columns:60px 1fr;gap:10px;align-items:center;margin-bottom:10px}
-    .highlight-row > div{display:flex;flex-direction:column;justify-content:center}
+    .bn-slot{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;margin-bottom:10px}
+    .bn-preview{position:relative;border:2px dashed #c8d9c9;border-radius:10px;overflow:hidden;background:#fafafa;cursor:pointer;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;transition:border-color .2s}
+    .bn-preview:hover{border-color:var(--green);background:var(--green-pale)}
+    .bn-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .bn-preview .bn-ph{display:flex;flex-direction:column;align-items:center;gap:6px;color:#9aab9b;font-size:.85rem;pointer-events:none}
+    .bn-preview .bn-ph span{font-size:2rem}
+    .bn-del{padding:7px 14px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;white-space:nowrap;align-self:start;margin-top:0}
+    .bn-del:hover{background:#fecaca}
 
     /* Highlight image upload */
     .hl-img-btn{width:56px;height:56px;border:2px dashed #c8d9c9;border-radius:8px;cursor:pointer;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fafafa;flex-shrink:0;transition:border-color .2s}
@@ -551,25 +557,9 @@
       <div class="fg"><label>⚠️ 注意事項（每條換行）</label><textarea id="p-cautions" style="min-height:80px" placeholder="・注意事項一&#10;・注意事項二..."></textarea></div>
 
       <div class="fg">
-        <label>🌿 產品亮點（4個）— 點擊圖示區上傳圖片</label>
-        <div id="highlights-editor">
-          <div class="highlight-row">
-            <div class="hl-img-btn" onclick="document.getElementById('hl-file-0').click()"><input id="hl-file-0" type="file" accept="image/*" style="display:none" onchange="handleHlImgUpload(this,0)" /><img id="hl-img-0" style="display:none" /><span id="hl-ph-0">📷</span></div>
-            <div><input type="hidden" class="hl-icon-img" id="hl-icon-img-0" /><input type="hidden" class="hl-icon" /><input type="text" placeholder="亮點文字" class="hl-text" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /></div>
-          </div>
-          <div class="highlight-row">
-            <div class="hl-img-btn" onclick="document.getElementById('hl-file-1').click()"><input id="hl-file-1" type="file" accept="image/*" style="display:none" onchange="handleHlImgUpload(this,1)" /><img id="hl-img-1" style="display:none" /><span id="hl-ph-1">📷</span></div>
-            <div><input type="hidden" class="hl-icon-img" id="hl-icon-img-1" /><input type="hidden" class="hl-icon" /><input type="text" placeholder="亮點文字" class="hl-text" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /></div>
-          </div>
-          <div class="highlight-row">
-            <div class="hl-img-btn" onclick="document.getElementById('hl-file-2').click()"><input id="hl-file-2" type="file" accept="image/*" style="display:none" onchange="handleHlImgUpload(this,2)" /><img id="hl-img-2" style="display:none" /><span id="hl-ph-2">📷</span></div>
-            <div><input type="hidden" class="hl-icon-img" id="hl-icon-img-2" /><input type="hidden" class="hl-icon" /><input type="text" placeholder="亮點文字" class="hl-text" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /></div>
-          </div>
-          <div class="highlight-row">
-            <div class="hl-img-btn" onclick="document.getElementById('hl-file-3').click()"><input id="hl-file-3" type="file" accept="image/*" style="display:none" onchange="handleHlImgUpload(this,3)" /><img id="hl-img-3" style="display:none" /><span id="hl-ph-3">📷</span></div>
-            <div><input type="hidden" class="hl-icon-img" id="hl-icon-img-3" /><input type="hidden" class="hl-icon" /><input type="text" placeholder="亮點文字" class="hl-text" style="width:100%;padding:9px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:.9rem" /></div>
-          </div>
-        </div>
+        <label>🖼️ 產品 Banner 橫幅（建議 1920×1080，可新增多張）</label>
+        <div id="banner-images-editor" style="margin-top:8px"></div>
+        <button type="button" onclick="addBannerSlot()" style="margin-top:10px;padding:9px 20px;background:var(--green);color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem">＋ 新增 Banner</button>
       </div>
     </div>
     <div class="modal-foot">
@@ -1422,18 +1412,11 @@ function openProductModal(id){
     document.getElementById('p-howto').value = p.howToUse||'';
     document.getElementById('p-cautions').value = p.cautions||'';
     if(p.image){ uploadedImageB64=p.image; document.getElementById('imgPreview').src=p.image; document.getElementById('imgPreview').style.display='block'; document.getElementById('imgPlaceholder').style.display='none'; }
-    const hls = p.highlights||[{icon:'',text:''},{icon:'',text:''},{icon:'',text:''},{icon:'',text:''}];
-    document.querySelectorAll('.hl-icon').forEach((el,i)=>el.value=hls[i]?hls[i].icon:'');
-    document.querySelectorAll('.hl-text').forEach((el,i)=>el.value=hls[i]?hls[i].text:'');
-    // load highlight images
-    for(let i=0;i<4;i++){
-      const iconImg = hls[i]?hls[i].iconImage||'':'';
-      document.getElementById('hl-icon-img-'+i).value = iconImg;
-      const imgEl = document.getElementById('hl-img-'+i);
-      const phEl = document.getElementById('hl-ph-'+i);
-      if(iconImg){ imgEl.src=iconImg; imgEl.style.display='block'; phEl.style.display='none'; }
-      else { imgEl.style.display='none'; phEl.style.display=''; }
-    }
+    // load banner images
+    const bns = p.bannerImages||[];
+    clearBannerSlots();
+    if(bns.length>0){ bns.forEach(url=>addBannerSlot(url)); }
+    else { addBannerSlot(); }
   }
   document.querySelector('.modal-body').scrollTop=0;
 }
@@ -1442,14 +1425,8 @@ function clearForm(){
   ['p-name','p-emoji','p-price','p-orig-price','p-short','p-tags','p-intro','p-ingredients','p-howto','p-cautions'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('p-cat').value='life';
   document.getElementById('p-badge').value='';
-  document.querySelectorAll('.hl-icon,.hl-text').forEach(el=>el.value='');
-  for(let i=0;i<4;i++){
-    document.getElementById('hl-icon-img-'+i).value='';
-    const imgEl=document.getElementById('hl-img-'+i);
-    const phEl=document.getElementById('hl-ph-'+i);
-    imgEl.style.display='none';
-    phEl.style.display='';
-  }
+  clearBannerSlots();
+  addBannerSlot();
 }
 
 function closeProductModal(){ document.getElementById('productModal').classList.add('hidden'); }
@@ -1462,15 +1439,15 @@ async function saveProduct(){
 
   const productId = editingProductId !== null ? editingProductId : Date.now();
 
-  // 上傳亮點圖示（base64 → Storage URL）
-  const highlights = [];
-  const icons   = document.querySelectorAll('.hl-icon');
-  const iconImgs = document.querySelectorAll('.hl-icon-img');
-  const texts   = document.querySelectorAll('.hl-text');
-  for(let i=0;i<icons.length;i++){
-    if(icons[i].value||texts[i].value||iconImgs[i].value){
-      const imgUrl = await maybeUpload(iconImgs[i].value, `products/${productId}/hl_${i}.jpg`);
-      highlights.push({icon:icons[i].value, iconImage:imgUrl, text:texts[i].value});
+  // 上傳 Banner 圖片（base64 → Storage URL）
+  const bannerImages = [];
+  for(let i=0;i<bannerImagesData.length;i++){
+    const item = bannerImagesData[i];
+    if(item.b64){
+      const url = await maybeUpload(item.b64, `products/${productId}/banner_${i}.jpg`);
+      if(url) bannerImages.push(url);
+    } else if(item.url){
+      bannerImages.push(item.url);
     }
   }
 
@@ -1493,7 +1470,7 @@ async function saveProduct(){
     ingredients: document.getElementById('p-ingredients').value,
     howToUse: document.getElementById('p-howto').value,
     cautions: document.getElementById('p-cautions').value,
-    highlights
+    bannerImages
   };
 
   showSaveToast('⏳ 儲存中…');
@@ -1536,7 +1513,7 @@ function compressImage(file, maxW, maxH, quality) {
 // ── Image upload ──
 async function handleImageUpload(input) {
   const file = input.files[0]; if (!file) return;
-  const b64 = await compressImage(file, 600, 600, 0.75);
+  const b64 = await compressImage(file, 1600, 1600, 0.95);
   uploadedImageB64 = b64;
   document.getElementById('imgPreview').src = b64;
   document.getElementById('imgPreview').style.display = 'block';
@@ -1611,14 +1588,50 @@ function clearFeatImg(idx){
   document.getElementById('feat-ph-'+idx).style.display='';
 }
 
-// ── Highlight icon image ──
-async function handleHlImgUpload(input, idx) {
-  const file = input.files[0]; if (!file) return;
-  const b64 = await compressImage(file, 200, 200, 0.80);
-  document.getElementById('hl-icon-img-'+idx).value = b64;
-  const img = document.getElementById('hl-img-'+idx);
-  img.src = b64; img.style.display = 'block';
-  document.getElementById('hl-ph-'+idx).style.display = 'none';
+// ── Banner Images ──
+let bannerImagesData = []; // [{b64:'', url:''}]
+
+function clearBannerSlots(){
+  bannerImagesData = [];
+  document.getElementById('banner-images-editor').innerHTML = '';
+}
+
+function addBannerSlot(existingUrl=''){
+  const idx = bannerImagesData.length;
+  bannerImagesData.push({b64:'', url: existingUrl});
+  const editor = document.getElementById('banner-images-editor');
+  const slot = document.createElement('div');
+  slot.className = 'bn-slot';
+  slot.dataset.idx = idx;
+  slot.innerHTML = `
+    <div class="bn-preview" id="bn-preview-${idx}" onclick="document.getElementById('bn-file-${idx}').click()">
+      <input id="bn-file-${idx}" type="file" accept="image/*" style="display:none" onchange="handleBannerUpload(this,${idx})">
+      ${existingUrl
+        ? `<img src="${existingUrl}" id="bn-img-${idx}">`
+        : `<div class="bn-ph" id="bn-ph-${idx}"><span>🖼️</span>點擊上傳 Banner（1920×1080）</div>`
+      }
+    </div>
+    <button type="button" class="bn-del" onclick="removeBannerSlot(${idx})">✕ 刪除</button>
+  `;
+  editor.appendChild(slot);
+}
+
+async function handleBannerUpload(input, idx){
+  const file = input.files[0]; if(!file) return;
+  const b64 = await compressImage(file, 1920, 1080, 0.82);
+  bannerImagesData[idx] = {b64, url:''};
+  const preview = document.getElementById('bn-preview-'+idx);
+  preview.innerHTML = `
+    <input id="bn-file-${idx}" type="file" accept="image/*" style="display:none" onchange="handleBannerUpload(this,${idx})">
+    <img src="${b64}" id="bn-img-${idx}">
+  `;
+}
+
+function removeBannerSlot(idx){
+  const editor = document.getElementById('banner-images-editor');
+  const slot = editor.querySelector(`.bn-slot[data-idx="${idx}"]`);
+  if(slot) editor.removeChild(slot);
+  bannerImagesData[idx] = {b64:'', url:''};
 }
 
 // ── Fresh Settings ──

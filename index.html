@@ -184,10 +184,18 @@
     .pd-section-body ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
     .pd-section-body ul li::before { content: '✦ '; color: var(--green); font-size: .7rem; }
     .pd-section-body.closed { display: none; }
-    .highlight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; margin-top: 4px; }
-    .highlight-item { background: var(--green-pale); border-radius: 12px; padding: 16px; text-align: center; }
-    .highlight-item .h-icon { font-size: 1.6rem; margin-bottom: 8px; }
-    .highlight-item p { font-size: .82rem; color: var(--green); font-weight: 500; }
+    /* ── PRODUCT BANNER SLIDER ── */
+    .pd-banner-slider { position: relative; overflow: hidden; border-radius: 12px; background: #111; margin-top: 4px; line-height: 0; }
+    .pd-banner-track { display: flex; transition: transform .5s cubic-bezier(.4,0,.2,1); }
+    .pd-banner-slide { min-width: 100%; }
+    .pd-banner-slide img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+    .pd-banner-prev, .pd-banner-next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.85); border: none; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; z-index: 5; transition: var(--transition); }
+    .pd-banner-prev { left: 10px; }
+    .pd-banner-next { right: 10px; }
+    .pd-banner-prev:hover, .pd-banner-next:hover { background: #fff; transform: translateY(-50%) scale(1.08); }
+    .pd-banner-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+    .pd-banner-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.5); border: none; cursor: pointer; transition: var(--transition); padding: 0; }
+    .pd-banner-dot.active { background: #fff; transform: scale(1.3); }
 
     /* Order form in product page */
     .pd-order-form { background: var(--white); border-radius: 16px; padding: 28px; margin-bottom: 16px; }
@@ -204,14 +212,21 @@
     .success-msg.show { display: block; }
     .success-msg .s-icon { font-size: 2.5rem; margin-bottom: 10px; }
 
-    /* ── FEATURES ── */
-    #features { padding: 80px 0; }
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
-    .feature-card { background: var(--white); border-radius: var(--radius); padding: 32px 24px; text-align: center; border: 1px solid var(--cream-dark); transition: var(--transition); }
-    .feature-card:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
-    .feature-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--green-pale); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 16px; }
-    .feature-title { font-family: 'Noto Serif TC', serif; font-size: 1.05rem; margin-bottom: 8px; }
-    .feature-desc { font-size: .85rem; color: var(--text-light); }
+    /* ── BANNER SLIDER ── */
+    #banner-slider { position: relative; overflow: hidden; background: #111; line-height: 0; }
+    .banner-track { display: flex; transition: transform .55s cubic-bezier(.4,0,.2,1); will-change: transform; }
+    .banner-slide { min-width: 100%; position: relative; }
+    .banner-slide img { width: 100%; aspect-ratio: 16/9; object-fit: cover; display: block; }
+    .banner-placeholder { width: 100%; aspect-ratio: 16/9; background: var(--green-pale); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--text-light); font-size: 1rem; line-height: 1.6; text-align: center; padding: 24px; }
+    .banner-placeholder .ph-icon { font-size: 3rem; }
+    .banner-prev, .banner-next { position: absolute; top: 50%; transform: translateY(-50%); z-index: 10; background: rgba(255,255,255,.88); border: none; border-radius: 50%; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; transition: var(--transition); box-shadow: 0 2px 14px rgba(0,0,0,.18); }
+    .banner-prev { left: 20px; }
+    .banner-next { right: 20px; }
+    .banner-prev:hover, .banner-next:hover { background: #fff; transform: translateY(-50%) scale(1.08); }
+    .banner-dots { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 10; }
+    .banner-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(255,255,255,.5); cursor: pointer; transition: var(--transition); border: none; padding: 0; }
+    .banner-dot.active { background: #fff; transform: scale(1.35); }
+    @media (max-width: 600px) { .banner-prev, .banner-next { width: 38px; height: 38px; font-size: 1.1rem; } .banner-prev { left: 10px; } .banner-next { right: 10px; } }
 
     /* ── CONTACT ── */
     #contact { padding: 80px 0; background: var(--white); }
@@ -466,19 +481,34 @@
     </div>
   </section>
 
-  <!-- ── FEATURES 關於我們 ── -->
-  <section id="features">
-    <div class="container">
-      <h2 class="section-title">為什麼選擇我們</h2>
-      <p class="section-sub">光明健康生活園地的承諾</p>
-      <!-- ✏️ 修改四項特色 -->
-      <div class="features-grid">
-        <div class="feature-card"><div class="feature-icon">🌿</div><div class="feature-title">100% 天然有機</div><p class="feature-desc">所有產品嚴格篩選天然有機原料，無農藥、無化學添加，守護您與家人的健康。</p></div>
-        <div class="feature-card"><div class="feature-icon">🔬</div><div class="feature-title">嚴格品質把關</div><p class="feature-desc">每批產品經過嚴格檢驗，確保純淨度與有效性，讓您使用得安心。</p></div>
-        <div class="feature-card"><div class="feature-icon">🌱</div><div class="feature-title">漢方草本配方</div><p class="feature-desc">傳承千年漢方智慧，結合現代科學，提供溫和有效的天然護理。</p></div>
-        <div class="feature-card"><div class="feature-icon">♻️</div><div class="feature-title">環保永續包裝</div><p class="feature-desc">採用可回收環保包材，減少碳足跡，與您一起守護這片美麗土地。</p></div>
+  <!-- ── BANNER SLIDER ── -->
+  <!-- ✏️ 新增/刪除 <div class="banner-slide"> 即可增減橫幅，建議圖片尺寸 1920×1080 -->
+  <section id="banner-slider">
+    <div class="banner-track" id="bannerTrack">
+
+      <!-- 第 1 張 Banner：把 src="" 填入圖片網址即可 -->
+      <div class="banner-slide">
+        <img src="" alt="Banner 1" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="display:none">
+        <div class="banner-placeholder"><span class="ph-icon">🖼️</span><span>Banner 1（1920×1080）<br>將 src="" 填入圖片網址</span></div>
       </div>
+
+      <!-- 第 2 張 Banner -->
+      <div class="banner-slide">
+        <img src="" alt="Banner 2" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" style="display:none">
+        <div class="banner-placeholder"><span class="ph-icon">🖼️</span><span>Banner 2（1920×1080）<br>將 src="" 填入圖片網址</span></div>
+      </div>
+
+      <!-- ✏️ 複製下方區塊可新增更多 Banner -->
+      <!--
+      <div class="banner-slide">
+        <img src="你的圖片網址" alt="Banner 3">
+      </div>
+      -->
+
     </div>
+    <button class="banner-prev" id="bannerPrev">&#8249;</button>
+    <button class="banner-next" id="bannerNext">&#8250;</button>
+    <div class="banner-dots" id="bannerDots"></div>
   </section>
 
   <!-- ── CONTACT 聯繫我們 ── -->
@@ -1451,21 +1481,24 @@ function openProduct(id) {
   // 特色標籤
   document.getElementById('pdTags').innerHTML = p.tags.map(t => `<span class="pd-tag">${t}</span>`).join('');
 
-  // 亮點
-  const highlights = p.highlights.map(h => `
-    <div class="highlight-item"><div class="h-icon">${h.iconImage ? `<img src="${h.iconImage}" style="width:2rem;height:2rem;object-fit:cover;border-radius:50%" />` : (h.icon||'')}</div><p>${h.text}</p></div>
-  `).join('');
+  // Banner 輪播
+  const bannerImgs = (p.bannerImages||[]).filter(Boolean);
+  const bannerHTML = bannerImgs.length > 0 ? `
+    <div class="pd-banner-slider" id="pdBannerSlider">
+      <div class="pd-banner-track" id="pdBannerTrack">
+        ${bannerImgs.map(url=>`<div class="pd-banner-slide"><img src="${url}" alt="產品圖片"></div>`).join('')}
+      </div>
+      ${bannerImgs.length>1?`<button class="pd-banner-prev" id="pdBannerPrev">&#8249;</button><button class="pd-banner-next" id="pdBannerNext">&#8250;</button><div class="pd-banner-dots" id="pdBannerDots"></div>`:''}
+    </div>` : '';
 
   // 展開區塊
   document.getElementById('pdSections').innerHTML = `
-    <div class="pd-section">
+    ${bannerHTML ? `<div class="pd-section">
       <div class="pd-section-header" onclick="toggleSection(this)">
         <h3>🌿 產品特色</h3><span class="pd-section-toggle">−</span>
       </div>
-      <div class="pd-section-body">
-        <div class="highlight-grid">${highlights}</div>
-      </div>
-    </div>
+      <div class="pd-section-body">${bannerHTML}</div>
+    </div>` : ''}
     <div class="pd-section">
       <div class="pd-section-header" onclick="toggleSection(this)">
         <h3>📖 產品介紹</h3><span class="pd-section-toggle">−</span>
@@ -1497,6 +1530,29 @@ function openProduct(id) {
   document.querySelector('#pdOrderForm form').style.display = '';
 
   showPage('product');
+
+  // 初始化產品 Banner 輪播
+  (function(){
+    const track = document.getElementById('pdBannerTrack');
+    const dotsWrap = document.getElementById('pdBannerDots');
+    const prev = document.getElementById('pdBannerPrev');
+    const next = document.getElementById('pdBannerNext');
+    if(!track) return;
+    const slides = track.querySelectorAll('.pd-banner-slide');
+    if(slides.length<=1) return;
+    let cur=0, timer;
+    slides.forEach((_,i)=>{
+      const dot=document.createElement('button');
+      dot.className='pd-banner-dot'+(i===0?' active':'');
+      dot.addEventListener('click',()=>{go(i);reset();});
+      dotsWrap.appendChild(dot);
+    });
+    function go(n){ cur=((n%slides.length)+slides.length)%slides.length; track.style.transform=`translateX(-${cur*100}%)`; dotsWrap.querySelectorAll('.pd-banner-dot').forEach((d,i)=>d.classList.toggle('active',i===cur)); }
+    function reset(){ clearInterval(timer); timer=setInterval(()=>go(cur+1),5000); }
+    prev.addEventListener('click',()=>{go(cur-1);reset();});
+    next.addEventListener('click',()=>{go(cur+1);reset();});
+    reset();
+  })();
 }
 
 function toggleSection(header) {
@@ -1819,6 +1875,60 @@ function applyAdminData(){
   applyAdminData();
   renderProductTabs();
   // 商品區預設顯示佔位提示，點選 category card 後才展開
+})();
+
+// ── BANNER SLIDER ──────────────────────────────────────
+(function() {
+  const track = document.getElementById('bannerTrack');
+  const dotsWrap = document.getElementById('bannerDots');
+  const prevBtn = document.getElementById('bannerPrev');
+  const nextBtn = document.getElementById('bannerNext');
+  if (!track) return;
+
+  const slides = track.querySelectorAll('.banner-slide');
+  if (slides.length === 0) return;
+
+  let cur = 0, timer;
+
+  // 初始化每張 slide：若 img src 有值才顯示圖片，否則顯示 placeholder
+  slides.forEach(slide => {
+    const img = slide.querySelector('img');
+    const ph = slide.querySelector('.banner-placeholder');
+    if (img && img.getAttribute('src')) {
+      img.style.display = '';
+      if (ph) ph.style.display = 'none';
+    }
+  });
+
+  // 建立 dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'banner-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Banner ' + (i + 1));
+    dot.addEventListener('click', () => { goTo(i); resetAuto(); });
+    dotsWrap.appendChild(dot);
+  });
+
+  function goTo(n) {
+    cur = ((n % slides.length) + slides.length) % slides.length;
+    track.style.transform = 'translateX(-' + cur * 100 + '%)';
+    dotsWrap.querySelectorAll('.banner-dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+  }
+
+  function resetAuto() {
+    clearInterval(timer);
+    if (slides.length > 1) timer = setInterval(() => goTo(cur + 1), 5000);
+  }
+
+  if (slides.length <= 1) {
+    prevBtn.style.display = 'none';
+    nextBtn.style.display = 'none';
+    dotsWrap.style.display = 'none';
+  } else {
+    prevBtn.addEventListener('click', () => { goTo(cur - 1); resetAuto(); });
+    nextBtn.addEventListener('click', () => { goTo(cur + 1); resetAuto(); });
+    resetAuto();
+  }
 })();
 </script>
 </body>
