@@ -212,9 +212,9 @@
 
     /* Highlight editor */
     .bn-slot{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;margin-bottom:10px}
-    .bn-preview{position:relative;border:2px dashed #c8d9c9;border-radius:10px;overflow:hidden;background:#fafafa;cursor:pointer;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;transition:border-color .2s}
+    .bn-preview{position:relative;border:2px dashed #c8d9c9;border-radius:10px;overflow:hidden;background:#fafafa;cursor:pointer;min-height:100px;display:flex;align-items:center;justify-content:center;transition:border-color .2s}
     .bn-preview:hover{border-color:var(--green);background:var(--green-pale)}
-    .bn-preview img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .bn-preview img{position:relative;width:100%;height:auto;display:block;object-fit:unset}
     .bn-preview .bn-ph{display:flex;flex-direction:column;align-items:center;gap:6px;color:#9aab9b;font-size:.85rem;pointer-events:none}
     .bn-preview .bn-ph span{font-size:2rem}
     .bn-del{padding:7px 14px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;white-space:nowrap;align-self:start;margin-top:0}
@@ -1608,7 +1608,7 @@ function addBannerSlot(existingUrl=''){
       <input id="bn-file-${idx}" type="file" accept="image/*" style="display:none" onchange="handleBannerUpload(this,${idx})">
       ${existingUrl
         ? `<img src="${existingUrl}" id="bn-img-${idx}">`
-        : `<div class="bn-ph" id="bn-ph-${idx}"><span>🖼️</span>點擊上傳 Banner（1920×1080）</div>`
+        : `<div class="bn-ph" id="bn-ph-${idx}"><span>🖼️</span>點擊上傳圖片（橫式或直式皆可）</div>`
       }
     </div>
     <button type="button" class="bn-del" onclick="removeBannerSlot(${idx})">✕ 刪除</button>
@@ -1618,7 +1618,7 @@ function addBannerSlot(existingUrl=''){
 
 async function handleBannerUpload(input, idx){
   const file = input.files[0]; if(!file) return;
-  const b64 = await compressImage(file, 1920, 1080, 0.82);
+  const b64 = await compressImage(file, 1080, 2400, 0.88);
   bannerImagesData[idx] = {b64, url:''};
   const preview = document.getElementById('bn-preview-'+idx);
   preview.innerHTML = `
