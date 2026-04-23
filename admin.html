@@ -1439,12 +1439,14 @@ async function saveProduct(){
 
   const productId = editingProductId !== null ? editingProductId : Date.now();
 
-  // 上傳 Banner 圖片（base64 → Storage URL）
+  // 上傳 Banner 圖片（過濾空項目，用時間戳記產生唯一檔名避免快取）
   const bannerImages = [];
-  for(let i=0;i<bannerImagesData.length;i++){
-    const item = bannerImagesData[i];
+  const validBanners = bannerImagesData.filter(item => item.b64 || item.url);
+  for(let i=0;i<validBanners.length;i++){
+    const item = validBanners[i];
     if(item.b64){
-      const url = await maybeUpload(item.b64, `products/${productId}/banner_${i}.jpg`);
+      const fname = `banner_${Date.now()}_${i}.jpg`;
+      const url = await maybeUpload(item.b64, `products/${productId}/${fname}`);
       if(url) bannerImages.push(url);
     } else if(item.url){
       bannerImages.push(item.url);
@@ -1628,10 +1630,26 @@ async function handleBannerUpload(input, idx){
 }
 
 function removeBannerSlot(idx){
-  const editor = document.getElementById('banner-images-editor');
-  const slot = editor.querySelector(`.bn-slot[data-idx="${idx}"]`);
-  if(slot) editor.removeChild(slot);
-  bannerImagesData[idx] = {b64:'', url:''};
+  bannerImagesData.splice(idx, 1);
+  // 重新渲染所有 slots，讓 idx 重新對齊
+  const urls = bannerImagesData.map(item => item.url || (item.b64 ? '__pending__' : ''));
+  const b64s = bannerImagesData.map(item => item.b64);
+  clearBannerSlots();
+  urls.forEach((url, i) => {
+    if(b64s[i]) {
+      addBannerSlot('');
+      bannerImagesData[i] = {b64: b64s[i], url: ''};
+      const preview = document.getElementById('bn-preview-'+i);
+      if(preview) preview.innerHTML = `
+        <input id="bn-file-${i}" type="file" accept="image/*" style="display:none" onchange="handleBannerUpload(this,${i})">
+        <img src="${b64s[i]}">
+      `;
+    } else if(url) {
+      addBannerSlot(url);
+    } else {
+      addBannerSlot('');
+    }
+  });
 }
 
 // ── Fresh Settings ──
